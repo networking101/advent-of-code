@@ -1,12 +1,12 @@
-with open("text.txt", "r") as fp:
-    lines = [line.strip() for line in fp]
+with open("input.txt", "r") as fp:
+    lines = [int(line.strip()) for line in fp]
 
 # silver
 for i in lines:
     for j in lines:
-        k = int(i) + int(j)
+        k = i + j
         if k == 2020:
-            print(int(i) * int(j))
+            print(i * j)
 
 print("")
 
@@ -14,7 +14,7 @@ print("")
 for i in lines:
     for j in lines:
         for k in lines:
-            l = int(i) + int(j) + int(k)
+            l = i + j + k
             if l == 2020:
-                print(int(i) * int(j) * int(k))
+                print(i * j * k)
 
