@@ -4,15 +4,11 @@ with open("input.txt", "r") as fp:
 res = []
 
 for line in lines:
-    r, c = 0, 0
+    t = 0
     for i in range(len(line)):
-        if line[i] == "B":
-            r += 1 << (6-i)
-        if line[i] == "R":
-            c += 1 << (9-i)
-
-    res.append(r * 8 + c )    
-
+        if line[i] == "B" or line[i] == "R":
+            t += 1 << (9-i)
+    res.append(t)    
 
 print("Part 1  " + str(max(res)))
 print("\n")
