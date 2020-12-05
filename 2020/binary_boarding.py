@@ -1,25 +1,17 @@
 with open("input.txt", "r") as fp:
     lines = [line.strip() for line in fp]
 
-
 res = []
 
 for line in lines:
-    s = 0
-    e = 127
-    l = 0
-    r = 7
-    for i in line:
-        if i == "F":
-            e = int((s+e)/2)
-        if i == "B":
-            s = int((s+e)/2)
-        if i == "R":
-            l = int((l+r)/2)
-        if i == "L":
-            r = int((l+r)/2)
+    r, c = 0, 0
+    for i in range(len(line)):
+        if line[i] == "B":
+            r += 1 << (6-i)
+        if line[i] == "R":
+            c += 1 << (9-i)
 
-    res.append(e * 8 + r )    
+    res.append(r * 8 + c )    
 
 
 print("Part 1  " + str(max(res)))
