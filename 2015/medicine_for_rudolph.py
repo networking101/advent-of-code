@@ -1,4 +1,6 @@
-with open("text2.txt", "r") as fp:
+from copy import deepcopy
+
+with open("text.txt", "r") as fp:
     lines = [line.strip() for line in fp]
 
 mol = lines[-1]
@@ -14,13 +16,12 @@ for line in lines:
     else:
         conv[a].append(b)
 
-for x in conv:
-    print(x, end="  ")
-    print(conv[x])
+endmol = set()
+data = {}
 
-endmol = []
-
+"""
 for j in conv:
+    data[j] = []
     ti = 0
     while True:
         ti = mol.find(j, ti)
@@ -32,12 +33,44 @@ for j in conv:
             if ti > 0:
                 ts += mol[:ti]
             ts += i
-            if ti < len(mol)-1:
-                ts += mol[ti+1:]
-            endmol.append(ts)
-        ti += 1
+            if ti < len(mol)-len(j):
+                ts += mol[ti+len(j):]
+            endmol.add(ts)
+            data[j].append(ts)
+        ti += len(j)
+"""
 
+revs = {}
+outs = []
 
-res = set(endmol)
+for i in conv:
+    for j in conv[i]:
+        revs[j] = i
+        outs.append(j)
 
-print(len(res))
+cnt = 0
+
+def recurse(mol):
+    global cnt
+    global data
+    i = 1
+    while i < len(mol):
+        found = False
+        if mol[:i] in outs:
+            cnt += 1
+            return (revs[mol[:i]], len(mol[:i]))
+        for j in outs:
+            if mol[:i] in j:
+                found = True
+                i += 1
+                break
+        if found == False:
+            subs, l = recurse(mol[i-1:])
+            mol = mol[:i-1] + subs + mol[i+l-1:]
+            i = 1
+
+recurse(mol)
+
+print(cnt)
+
+print(len(endmol))
