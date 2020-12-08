@@ -18,24 +18,26 @@ for x in conv:
     print(x, end="  ")
     print(conv[x])
 
-endmol = [""]
+endmol = []
 
-def whatever(x):
-    global endmol
-    global cnt
-    for j in range(len(endmol)):
-        k = endmol.pop(0)
-        for i in conv[x]:
-            endmol.append(k + i)
+for j in conv:
+    ti = 0
+    while True:
+        ti = mol.find(j, ti)
+        if ti == -1:
+            break
 
-for i in range(len(mol)):
-    x = mol[i]
-    if x in conv:
-        whatever(x)
-    y = mol[i:i+2]
-    if y in conv:
-        whatever(y)
+        for i in conv[j]:
+            ts = ""
+            if ti > 0:
+                ts += mol[:ti]
+            ts += i
+            if ti < len(mol)-1:
+                ts += mol[ti+1:]
+            endmol.append(ts)
+        ti += 1
 
-for i in endmol:
-    print(i)
-print(len(endmol))
+
+res = set(endmol)
+
+print(len(res))
