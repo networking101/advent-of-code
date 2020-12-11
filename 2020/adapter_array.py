@@ -40,7 +40,6 @@ def recurse(p, l):
 low = 0
 tot = 1
 lines.insert(0, 0)
-print(lines)
 for i in range(1,len(lines)-1):
     if lines[i+1] - lines[i-1] > 3:
         nl = lines[low:i+1]

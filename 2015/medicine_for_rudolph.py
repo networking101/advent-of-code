@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-with open("text.txt", "r") as fp:
+with open("text3.txt", "r") as fp:
     lines = [line.strip() for line in fp]
 
 mol = lines[-1]
@@ -48,6 +48,8 @@ for i in conv:
         revs[j] = i
         outs.append(j)
 
+print(outs)
+
 cnt = 0
 
 def recurse(mol):
@@ -55,6 +57,7 @@ def recurse(mol):
     global data
     i = 1
     while i < len(mol):
+        #input(mol[:i])
         found = False
         if mol[:i] in outs:
             cnt += 1
@@ -65,8 +68,15 @@ def recurse(mol):
                 i += 1
                 break
         if found == False:
-            subs, l = recurse(mol[i-1:])
+            try:
+                subs, l = recurse(mol[i-1:])
+            except:
+                print(mol)
+                print(i)
+                print(cnt)
+                exit(0)
             mol = mol[:i-1] + subs + mol[i+l-1:]
+            #print(mol)
             i = 1
 
 recurse(mol)
