@@ -7,7 +7,6 @@ y = -1
 i = 0
 j = 0
 d = 1
-q = 0
 for k in lines:
     if k[0] == "F":
         i += x * int(k[1:])
@@ -18,17 +17,12 @@ for k in lines:
         if int(t/90) % 4 == 2:
             nx = -x
             ny = -y
-            q = (q + 2) % 4
-        if int(t/90) % 4 == 0:
-            continue
         if int(t/90) % 4 == 1:
             ny = x
             nx = y*-1
-            q = (q + 1) % 4
         if int(t/90) % 4 == 3:
             ny = x*-1
             nx = y
-            q = (q + 3) % 4
         y = ny
         x = nx
 
@@ -37,17 +31,12 @@ for k in lines:
         if int(t/90) % 4 == 2:
             nx = -x
             ny = -y
-            q = (q - 2) % 4
-        if int(t/90) % 4 == 0:
-            continue
         if int(t/90) % 4 == 1:
             ny = x*-1
             nx = y
-            q = (q - 1) % 4
         if int(t/90) % 4 == 3:
             ny = x
             nx = y*-1
-            q = (q - 3) % 4
         y = ny
         x = nx
 
