@@ -1,8 +1,9 @@
 with open("input.txt", "r") as fp:
     lines = [line.strip() for line in fp]
 
-ans = "silver"
-#ans = "gold"
+
+#ans = "silver"
+ans = "gold"
 
 if ans == "silver":
     x = 0
@@ -13,6 +14,7 @@ if ans == "gold":
 
 i = 0
 j = 0
+# direction 0 = north, 1 = east, 2 = south, 3 = west
 d = 1
 for k in lines:
     if k[0] == "F":
@@ -78,6 +80,7 @@ for k in lines:
     if k[0] == "W":
         x -= int(k[1:])
 
+print(x, y)
 
 if ans == "silver":
     print("Silver:  " + str(abs(x) + abs(y)))
