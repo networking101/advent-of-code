@@ -1,6 +1,7 @@
 from copy import deepcopy
+import re
 
-with open("text3.txt", "r") as fp:
+with open("text.txt", "r") as fp:
     lines = [line.strip() for line in fp]
 
 mol = lines[-1]
@@ -16,10 +17,10 @@ for line in lines:
     else:
         conv[a].append(b)
 
+
+
 endmol = set()
 data = {}
-
-"""
 for j in conv:
     data[j] = []
     ti = 0
@@ -38,7 +39,9 @@ for j in conv:
             endmol.add(ts)
             data[j].append(ts)
         ti += len(j)
-"""
+
+print("Silver:  " + str(len(endmol)))
+
 
 revs = {}
 outs = []
@@ -46,41 +49,77 @@ outs = []
 for i in conv:
     for j in conv[i]:
         revs[j] = i
-        outs.append(j)
+        if revs[j] != 'e':
+            outs.append(j)
 
-print(outs)
+doubles = {}
+deuces = {}
+trips = {}
+pairs = {}
+
+tri = re.compile('.*Rn.*Y.*Ar')
+pair = re.compile('.*Rn.*Ar')
+
+for i in revs:
+    if revs[i] == 'e':
+        continue
+
+    if i == revs[i]*2:
+        doubles[i] = revs[i]
+    elif len(i) <= 4:
+        deuces[i] = revs[i]
+    elif tri.match(i):
+        trips[i] = revs[i]
+    elif pair.match(i):
+        pairs[i] = revs[i]
 
 cnt = 0
+oldmol = ""
+while oldmol != mol:
+    oldmol = mol
+    found = False
 
-def recurse(mol):
-    global cnt
-    global data
-    i = 1
-    while i < len(mol):
-        #input(mol[:i])
-        found = False
-        if mol[:i] in outs:
+    # check for doubles
+    for i in doubles:
+        while i in mol:
+            found = True
             cnt += 1
-            return (revs[mol[:i]], len(mol[:i]))
-        for j in outs:
-            if mol[:i] in j:
-                found = True
-                i += 1
-                break
-        if found == False:
-            try:
-                subs, l = recurse(mol[i-1:])
-            except:
-                print(mol)
-                print(i)
-                print(cnt)
-                exit(0)
-            mol = mol[:i-1] + subs + mol[i+l-1:]
-            #print(mol)
-            i = 1
+            mol = mol.replace(i, doubles[i], 1)
+    
+    # check for deuces
+    for i in deuces:
+        while i in mol:
+            found = True
+            cnt += 1
+            mol = mol.replace(i, deuces[i], 1)
 
-recurse(mol)
+    if found == True:
+        continue
 
-print(cnt)
+    # check for trips
+    for i in trips:
+        while i in mol:
+            found = True
+            cnt += 1
+            mol = mol.replace(i, trips[i], 1)
 
-print(len(endmol))
+    # check for pairs
+    for i in pairs:
+        while i in mol:
+            found = True
+            cnt += 1
+            mol = mol.replace(i, pairs[i], 1)
+        
+    if found == True:
+        continue
+
+# molecules are mixed up now, count special molecules
+
+moll = re.findall('[A-Z][^A-Z]*', mol)
+
+a = len(moll)
+b = moll.count("Rn")
+
+s = a - b*4 + 1
+
+print("Gold:  " + str(s + cnt))
