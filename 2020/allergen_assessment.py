@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-with open("text.txt", "r") as fp:
+with open("input.txt", "r") as fp:
     lines = [line.strip() for line in fp]
 
 ingredients = set()

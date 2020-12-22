@@ -1,9 +1,9 @@
 from math import sqrt
+from copy import deepcopy
 
-with open("input2.txt", "r") as fp:
+with open("input.txt", "r") as fp:
     lines = [line.strip() for line in fp]
 
-tt = ["123", "456", "789"]
 
 data = {}
 name = ""
@@ -83,17 +83,20 @@ def get_left(tile):
         x += i[0]
     return x
 
+# get first tile
 for i in data:
     starting = [i]
     found1 = [i]
     break
 
+
+
 # get orientation
 while starting:
     i = starting.pop(0)
-    first = data[i]
+    first = deepcopy(data[i])
     for j in data:
-        second = data[j]
+        second = deepcopy(data[j])
         if i == j:
             continue
 
@@ -122,11 +125,10 @@ while starting:
                         break
                     data[j] = flip(second)
                     second = data[j]
+            first = rotate_left(first)
 
-            data[i] = rotate_left(first)
-            first = data[i]
-    input(i)
 
+# get the first corner
 first = ""
 silver = 1
 for i in orientation:
@@ -139,10 +141,9 @@ for i in orientation:
         first = i
         silver *= int(i)
 
-first = "1951"
+print("Silver:  " + str(silver))
 
-print(silver)
-
+# set up actual image
 picture = []
 wall_size = int(sqrt(len(data)))
 for i in range(wall_size):
@@ -150,70 +151,49 @@ for i in range(wall_size):
     for j in range(wall_size):
         picture[i].append("")
 
-# orient the first orientation
+# orient the top left corner
 for i in range(4):
     if orientation[first][0] or orientation[first][3]:
         data[first] = rotate_right(data[first])
-        orientation[first].append(orientation[first].pop(0))
+        orientation[first].insert(0, orientation[first].pop())
     else:
         break
 picture[0][0] = first
 found = [(first, [0,0])]
 found2 = [first]
 
-"""
-for i in orientation:
-    print(i, end="  ")
-    print(orientation[i])
-"""
 
 def fix_or(y, x, adj, cur):
-    
-    #print("Adj: " + adj)
-    #print(orientation[adj])
-    #print("")
-
     if (y == 0 and orientation[adj][0] != "") or (x == 0 and orientation[adj][3] != "") or (y == wall_size-1 and orientation[adj][2] != "") or (x == wall_size-1 and orientation[adj][1] != ""):
-        #print("FLIP")
         data[adj] = flip(data[adj])
         t = orientation[adj][1]
         orientation[adj][1] = orientation[adj][3]
-        orientation[adj][3] = t        
+        orientation[adj][3] = t
         while orientation[adj][(i+2)%4] != cur:
-            #print("ROT RIGHT")
             data[adj] = rotate_right(data[adj])
-            orientation[adj].append(orientation[adj].pop(0))
-
-        #print("Adj: " + adj)
-        #print(orientation[adj])
-        #print("")
+            orientation[adj].insert(0, orientation[adj].pop())
 
 # put each tile in the correct position with the correct orientation
 while found:
     curr, pos = found.pop(0)
     y, x = pos
-    print("CURR: " + curr)
-    for i in data[curr]:
-        print(i)
-    print("")
     for i in range(4):
         if orientation[curr][i]:
             offset = 0
             adjacent = orientation[curr][i]
             if adjacent in found2:
                 continue
-            #if adjacent == "2473":
-                #print("FOUND!!!!")
-                #for z in data[adjacent]:
-                #    print(z)
-                #print(orientation[adjacent])
-                #print("\n")
             while orientation[adjacent][(i+2)%4] != curr:
                 data[adjacent] = rotate_right(data[adjacent])
-                orientation[adjacent].append(orientation[adjacent].pop(0))
+                orientation[adjacent].insert(0, orientation[adjacent].pop())
                 offset += 1
             if i == 0:
                 fix_or(y-1, x, adjacent, curr)
+                if get_top(data[curr]) == get_bottom(data[adjacent]):
+                    data[adjacent] = flip(data[adjacent])
+                    t = orientation[adjacent][1]
+                    orientation[adjacent][1] = orientation[adjacent][3]
+                    orientation[adjacent][3] = t
                 picture[y-1][x] = adjacent
                 found.append((adjacent, [y-1, x]))
             if i == 1:
@@ -222,6 +202,11 @@ while found:
                 found.append((adjacent, [y, x+1]))
             if i == 2:
                 fix_or(y+1, x, adjacent, curr)
+                if get_bottom(data[curr]) == get_top(data[adjacent]):
+                    data[adjacent] = flip(data[adjacent])
+                    t = orientation[adjacent][1]
+                    orientation[adjacent][1] = orientation[adjacent][3]
+                    orientation[adjacent][3] = t
                 picture[y+1][x] = adjacent
                 found.append((adjacent, [y+1, x]))
             if i == 3:
@@ -231,23 +216,18 @@ while found:
 
             found2.append(adjacent)
 
-    for i in picture:
-        print(i)
-    input("")
-
-exit(0)
-
 for i in data:
     tilesize = len(data[i][0])-2
     break
 
+# set final picture without borders
 tracker = 0
 final = []
 for i in range(len(picture)):
     for j in range(len(picture[i])):
         t = data[picture[i][j]]
-        t.pop(0)
         t.pop()
+        t.pop(0)
         for k in range(len(t)):
             t[k] = t[k][1:-1]
             if j == 0:
@@ -257,6 +237,37 @@ for i in range(len(picture)):
     
     tracker += tilesize
 
-for i in final:
-    print(i)
+monster = [[1,0],[2,1],[2,4],[1,5],[1,6],[2,7],[2,10],[1,11],[1,12],[2,13],[2,16],[1,17],[0,18],[1,18],[1,19]]
 
+# find monster
+cnt = 0
+for k in range(8):
+    realcase = False
+    for i in range(len(final)-2):
+        for j in range(len(final[i])-19):
+            case = True
+            for m, n in monster:
+                if final[i+m][j+n] != "#":
+                    case = False
+            if case == True:
+                realcase = True
+                
+                for m, n in monster:
+                    final[i+m] = final[i+m][:j+n] + "O" + final[i+m][j+n+1:]
+                
+                cnt += 1
+
+    if realcase == True:
+        break
+    final = rotate_right(final)
+
+    if k == 3:
+        final = flip(final)
+
+count = 0
+for i in final:
+    for j in i:
+        if j == "#":
+            count += 1
+
+print("Gold:    " + str(count))
