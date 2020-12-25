@@ -237,10 +237,6 @@ for i in range(len(picture)):
     
     tracker += tilesize
 
-for i in final:
-    print(i)
-input("")
-
 monster = [[1,0],[2,1],[2,4],[1,5],[1,6],[2,7],[2,10],[1,11],[1,12],[2,13],[2,16],[1,17],[0,18],[1,18],[1,19]]
 
 # find monster
@@ -267,14 +263,6 @@ for k in range(8):
 
     if k == 3:
         final = flip(final)
-
-for i in final:
-    for j in i:
-        if j == "O":
-            print(j, end="")
-        else:
-            print(" ", end="")
-    print("")
 
 count = 0
 for i in final:
