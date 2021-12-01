@@ -1,0 +1,78 @@
+     1                                 %line 1+1 solve1.asm
+     2                                 
+     3                                 
+     4                                 [section .data]
+     5                                 
+     6                                 [section .bss]
+     7 00000000 <gap>                   bufStart resq 1
+     8 00000008 <gap>                   indexSize resq 1
+     9                                 
+    10                                 [extern atoi]
+    11                                 
+    12                                 [section .text]
+    13                                 [global solve1]
+    14                                 solve1:
+    15 00000000 55                      push rbp
+    16 00000001 53                      push rbx
+    17 00000002 4157                    push r15
+    18 00000004 4156                    push r14
+    19 00000006 4155                    push r13
+    20 00000008 4154                    push r12
+    21 0000000A 4889E5                  mov rbp, rsp
+    22 0000000D 4883EC08                sub rsp, 0x8
+    23                                 
+    24                                 main:
+    25 00000011 48893C25[00000000]      mov qword [bufStart], rdi
+    26 00000019 4889F1                  mov rcx, rsi
+    27                                 l1:
+    28 0000001C 803F0A                  cmp byte [rdi], 0xa
+    29 0000001F 7509                    jne cont
+    30 00000021 C60700                  mov byte [rdi], 0
+    31 00000024 48FF0425[00000000]      inc qword [indexSize]
+    32                                 cont:
+    33 0000002C 48FFC7                  inc rdi
+    34 0000002F E2E9                    loop l1
+    35                                 
+    36                                 count:
+    37 00000031 488B3C25[00000000]      mov rdi, qword [bufStart]
+    38 00000039 49C7C700000000          mov r15, 0
+    39 00000040 49C7C600000000          mov r14, 0
+    40 00000047 4989FC                  mov r12, rdi
+    41 0000004A E8(F6FFFFFF)            call atoi
+    42 0000004F 4989C6                  mov r14, rax
+    43 00000052 4C89E7                  mov rdi, r12
+    44                                 
+    45                                 l2:
+    46 00000055 48FFC7                  inc rdi
+    47 00000058 803F00                  cmp byte [rdi], 0
+    48 0000005B 75F6                    jne l2
+    49                                 
+    50                                 skip:
+    51 0000005D 48FFC7                  inc rdi
+    52 00000060 4989FC                  mov r12, rdi
+    53 00000063 E8(F6FFFFFF)            call atoi
+    54 00000068 4C89E7                  mov rdi, r12
+    55 0000006B 4C39F0                  cmp rax, r14
+    56 0000006E 7E01                    jle noIncrease
+    57 00000070 49FFC7                  inc r15
+    58                                 
+    59                                 noIncrease:
+    60 00000073 4989C6                  mov r14, rax
+    61 00000076 48FF0C25[00000000]      dec qword [indexSize]
+    62 0000007E 48833C25[00000000]-     cmp qword [indexSize], 0
+    63 0000007E 00                 
+    64 00000087 75CA                    jne l2
+    65                                 
+    66                                 done:
+    67 00000089 4C89F8                  mov rax, r15
+    68                                 
+    69                                 fin:
+    70 0000008C 4883C408                add rsp, 0x8
+    71 00000090 4889EC                  mov rsp, rbp
+    72 00000093 415C                    pop r12
+    73 00000095 415D                    pop r13
+    74 00000097 415E                    pop r14
+    75 00000099 415F                    pop r15
+    76 0000009B 5B                      pop rbx
+    77 0000009C 5D                      pop rbp
+    78 0000009D C3                      ret
