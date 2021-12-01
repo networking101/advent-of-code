@@ -3,7 +3,7 @@
 section         .data
     inputFile       db      "./input", 0
 
-    numfmt          db      "%d", 10, 0
+    numfmt          db      "%lu", 10, 0
 
     EXIT_SUCCESS    equ     0
     SYS_exit        equ     60
