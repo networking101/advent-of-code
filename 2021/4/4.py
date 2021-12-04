@@ -88,5 +88,3 @@ while len(tiles) != 0:
                     newTiles.append(tiles[t])
             tiles = newTiles
             break
-
-print(calculate(tiles[0], drawn[i]))
