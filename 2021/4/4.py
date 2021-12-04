@@ -33,6 +33,7 @@ def calculate(t, d):
                 sum += int(y)
     return sum * int(d)
 
+# Silver
 stop = False
 for i in range(len(drawn)):
     for x in range(len(tiles)):
