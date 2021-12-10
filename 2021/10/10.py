@@ -67,5 +67,4 @@ newscore2 = sorted(score2)
 finalscore2 = newscore2[int(len(score2)/2)]
 
 print(score)
-
 print(finalscore2)
