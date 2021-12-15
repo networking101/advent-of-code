@@ -90,4 +90,4 @@ finalfinalDict[template[-1]] += 1
 tl = finalfinalDict.values()
 print(max(tl) - min(tl))
 end = time()
-print("Time: " + str(end-start))
+print("Runtime: " + str(end-start))
