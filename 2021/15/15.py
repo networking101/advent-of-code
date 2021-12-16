@@ -47,6 +47,8 @@ for j in range(ysize, -1, -1):
 
 print(min(distances[0][1], distances[1][0]))
 
+
+# Gold
 ysize2 = len(grid)*5 - 1
 xsize2 = len(grid[0])*5 - 1
 
