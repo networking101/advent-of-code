@@ -1,4 +1,5 @@
 from copy import deepcopy
+from heapq import *
 
 with open("input", "r") as fp:
     grid = [[int(x) for x in line.strip()] for line in fp]
@@ -6,8 +7,8 @@ with open("input", "r") as fp:
 backup_grid = deepcopy(grid)
 maxVal = 999999999
 
-ysize = len(grid) - 1
-xsize = len(grid[0])-1
+ysize = len(grid)
+xsize = len(grid[0])
 
 distances = []
 for j in range(len(grid)):
@@ -16,46 +17,43 @@ for j in range(len(grid)):
         d.append(maxVal)
     distances.append(d)
 
-distances[ysize][xsize] = grid[ysize][xsize]
+h = []
+heappush(h, (0, 0, 0))
 
-for j in range(ysize, -1, -1):
-    for i in range(xsize, -1, -1):
-        if i == xsize and j == ysize:
-            continue
+def checkDistance(d, y, x):
+    global grid
+    global distances
+    global h
+    global ysize
+    global xsize
+    if y >= ysize or y < 0  or x >= xsize or x < 0:
+        return
 
-        if j+1 > ysize:
-            down = maxVal
-        else:
-            down = distances[j+1][i]
+    newdist = d + grid[y][x]
+    if newdist < distances[y][x]:
+        distances[y][x] = newdist
+        heappush(h, (newdist, y, x))
 
-        if i+1 > xsize:
-            right = maxVal
-        else:
-            right = distances[j][i+1]
+while h:
+    dist, y, x = heappop(h)
 
-        if j-1 < 0:
-            up = maxVal
-        else:
-            up = distances[j-1][i]
+    checkDistance(dist, y+1, x)
+    checkDistance(dist, y-1, x)
+    checkDistance(dist, y, x+1)
+    checkDistance(dist, y, x-1)
 
-        if i-1 < 0:
-            left = maxVal
-        else:
-            left = distances[j][i-1]
 
-        distances[j][i] = grid[j][i] + min(up, down, left, right)
-
-print(min(distances[0][1], distances[1][0]))
+print(distances[ysize-1][xsize-1])
 
 
 # Gold
-ysize2 = len(grid)*5 - 1
-xsize2 = len(grid[0])*5 - 1
+ysize2 = len(grid)*5
+xsize2 = len(grid[0])*5
 
 # make grid2
 grid2 = []
-for j in range(ysize2 + 1):
-    grid2.append([0] * (xsize2 + 1))
+for j in range(ysize2):
+    grid2.append([0] * (xsize2))
 
 # fill in old grid values to grid2
 for j in range(len(backup_grid)):
@@ -63,17 +61,17 @@ for j in range(len(backup_grid)):
         grid2[j][i] =  backup_grid[j][i]
 
 # expand grid2 in the y direction
-for j in range(ysize + 1, ysize2 + 1):
-    for i in range(xsize + 1):
-        tmp = grid2[j - (ysize+1)][i] + 1
+for j in range(ysize, ysize2):
+    for i in range(xsize):
+        tmp = grid2[j - (ysize)][i] + 1
         if tmp > 9:
             tmp = 1
         grid2[j][i] = tmp
 
 # expand the rest of grid2 in the x direction
-for j in range(ysize2 + 1):
-    for i in range(xsize + 1, xsize2 + 1):
-        tmp = grid2[j][i - (xsize + 1)] + 1
+for j in range(ysize2):
+    for i in range(xsize, xsize2):
+        tmp = grid2[j][i - (xsize)] + 1
         if tmp > 9:
             tmp = 1
         grid2[j][i] = tmp
@@ -85,34 +83,30 @@ for j in range(len(grid2)):
         d.append(maxVal)
     distances2.append(d)
 
-distances2[ysize2][xsize2] = grid2[ysize2][xsize2]
-maxVal = 999999999
+h2 = []
+heappush(h2, (0, 0, 0))
 
-for j in range(ysize2, -1, -1):
-    for i in range(xsize2, -1, -1):
-        if i == xsize2 and j == ysize2:
-            continue
+def checkDistance2(d, y, x):
+    global grid2
+    global distances2
+    global h2
+    global ysize2
+    global xsize2
+    if y >= ysize2 or y < 0  or x >= xsize2 or x < 0:
+        return
 
-        if j+1 > ysize2:
-            down = maxVal
-        else:
-            down = distances2[j+1][i]
+    newdist = d + grid2[y][x]
+    if newdist < distances2[y][x]:
+        distances2[y][x] = newdist
+        heappush(h2, (newdist, y, x))
 
-        if i+1 > xsize2:
-            right = maxVal
-        else:
-            right = distances2[j][i+1]
+while h2:
+    dist, y, x = heappop(h2)
 
-        if j-1 < 0:
-            up = maxVal
-        else:
-            up = distances2[j-1][i]
+    checkDistance2(dist, y+1, x)
+    checkDistance2(dist, y-1, x)
+    checkDistance2(dist, y, x+1)
+    checkDistance2(dist, y, x-1)
 
-        if i-1 < 0:
-            left = maxVal
-        else:
-            left = distances2[j][i-1]
 
-        distances2[j][i] = grid2[j][i] + min(up, down, left, right)
-
-print(min(distances2[0][1], distances2[1][0]))
+print(distances2[ysize2-1][xsize2-1])
