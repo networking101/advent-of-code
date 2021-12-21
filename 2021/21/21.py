@@ -73,7 +73,7 @@ def rolling(p1, p2, s1, s2, turn):
             for j in range(3):
                 for k in range(3):
                     np2 = (p2 + dice[i] + dice[j] + dice[k]) % len(board)
-                    ns2 = s2 + board[np1]
+                    ns2 = s2 + board[np2]
                     a, b = rolling(p1, np2, s1, ns2, (turn+1)%2)
                     result[0] += a
                     result[1] += b
