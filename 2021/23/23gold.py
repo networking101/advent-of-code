@@ -3,15 +3,15 @@ from time import time
 
 starttime = time()
 
-with open("input", "r") as fp:
+with open("inputgold", "r") as fp:
     lines = [line.rstrip() for line in fp]
 
-roomDepth = 3
+roomDepth = 5
 
 initialPositions = {}
 finalPositions = {'A': 3, 'B': 5, 'C':7, 'D':9}
 restingPositions = [1, 2, 4, 6, 8, 10, 11]
-passingPositions = [(2,3), (2,5), (2,7), (2,9), (3,3), (3,5), (3,7), (3,9)]
+passingPositions = [(2,3), (2,5), (2,7), (2,9), (3,3), (3,5), (3,7), (3,9), (4,3), (4,5), (4,7), (4,9), (5,3), (5,5), (5,7), (5,9)]
 cost = {'A': 1, 'B': 10, 'C': 100, 'D': 1000}
 
 grid = []
@@ -20,12 +20,15 @@ for j in range(len(lines)):
     for i in range(len(lines[j])):
         row.append(lines[j][i])
         if lines[j][i] in ["A", "B", "C", "D"]:
-            tmp = lines[j][i]
             if lines[j][i] not in initialPositions:
                 initialPositions[lines[j][i]] = {}
                 initialPositions[lines[j][i]][0] = ((j,i), "start")
             else:
-                initialPositions[lines[j][i]][1] = ((j,i), "start")
+                tmpKeys = initialPositions[lines[j][i]].keys()
+                k = 0
+                while k in tmpKeys:
+                    k += 1
+                initialPositions[lines[j][i]][k] = ((j,i), "start")
     grid.append(row)
 
 def checkIfDone(position):
@@ -42,12 +45,21 @@ def getDPString(position):
         tmp = []
         for i in position[char]:
             tmp.append(position[char][i][0])
-        ret += str(min(tmp)) + str(max(tmp))
+        for _ in range(len(tmp)):
+            c = min(tmp)
+            ret += str(c)
+            tmp.remove(c)
 
     return ret
 
-def checkBlocked(first, second, rp):
-    for i in range(min(first, second)+1, max(first, second)):
+def checkBlocked(cp, bp, second, rp, pp):
+    # check passing positions
+    for i in range(2, cp[0]):
+        if (i, cp[1]) not in pp:
+            return False
+
+    # check resting positions
+    for i in range(min(cp[1], second)+1, max(cp[1], second)):
         if i%2 == 0:
             if i not in rp:
                 return False
@@ -64,7 +76,6 @@ def checkFinalStart(grid, position, bp, p):
     return True
 
 def checkFinalReady(grid, position, bp, p):
-    tmp = list(range(roomDepth, 1, -1))
     for i in range(roomDepth, 1, -1):
         if grid[i][finalPositions[bp]] == bp:
             continue
@@ -99,7 +110,7 @@ def solve(grid, position, currRP, currPP):
                 newPos = checkFinalReady(grid, position, bp, p)
                 if newPos:
                     newPlacement = (newPos, finalPositions[bp])
-                    if checkBlocked(currPos[1], newPlacement[1], currRP):
+                    if checkBlocked(currPos, bp, newPlacement[1], currRP, currPP):
                         npp = deepcopy(currPP)
                         npp.remove(newPlacement)
                         nrp = deepcopy(currRP)
@@ -114,6 +125,7 @@ def solve(grid, position, currRP, currPP):
                         # we can return because this is the best decision to make
                         DP[dpString] = best + energyCost
                         return best + energyCost
+                continue
 
             if currState == "start":
                 # check if we are starting in the final position. If so, we found the best move and we can return
@@ -143,7 +155,7 @@ def solve(grid, position, currRP, currPP):
                     if rp == 11 and 10 not in currRP:
                         continue
 
-                    if checkBlocked(currPos[1], rp, currRP):
+                    if checkBlocked(currPos, bp, rp, currRP, currPP):
                         npp = deepcopy(currPP)
                         npp.append(currPos)
                         nrp = deepcopy(currRP)
