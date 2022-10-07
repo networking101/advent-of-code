@@ -67,4 +67,4 @@ def solve(modelNumber, instructions):
     return False
 
 
-solve(str(99999999999999), instructions)
+solve(str(92967699949891), instructions)
