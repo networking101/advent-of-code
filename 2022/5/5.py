@@ -54,18 +54,3 @@ print()
 for s in ss:
     print(ss[s][-1], end='')
 print()
-
-# for i in instructions:
-#     obs = i.split()
-#     val = obs[1]
-#     frm = obs[3]
-#     to = obs[5]
-
-#     mov = (-1*int(val))
-#     tmp = ss[frm][mov:]
-#     ss[frm] = ss[frm][:mov]
-#     ss[to] = ss[to] + tmp
-
-# for s in ss:
-#     print(ss[s][-1], end='')
-# print()
