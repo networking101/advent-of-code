@@ -42,23 +42,30 @@ for i in instructions:
         tmp = stack_set[frm].pop()
         stack_set[to].append(tmp)
 
-for s in stack_set:
-    print(stack_set[s][-1], end='')
-print()
-
-for i in instructions:
-    obs = i.split()
-    val = obs[1]
-    frm = obs[3]
-    to = obs[5]
-
     mov = (-1*int(val))
-    #print(ss[frm])
-    #print(ss[frm][:mov])
     tmp = ss[frm][mov:]
     ss[frm] = ss[frm][:mov]
     ss[to] = ss[to] + tmp
 
+for s in stack_set:
+    print(stack_set[s][-1], end='')
+print()
+
 for s in ss:
     print(ss[s][-1], end='')
 print()
+
+# for i in instructions:
+#     obs = i.split()
+#     val = obs[1]
+#     frm = obs[3]
+#     to = obs[5]
+
+#     mov = (-1*int(val))
+#     tmp = ss[frm][mov:]
+#     ss[frm] = ss[frm][:mov]
+#     ss[to] = ss[to] + tmp
+
+# for s in ss:
+#     print(ss[s][-1], end='')
+# print()
