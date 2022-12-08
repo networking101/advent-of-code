@@ -1,26 +1,27 @@
-#with open("input", "r") as fp:
-with open("input2", "r") as fp:
+with open("input", "r") as fp:
     lines = [line.strip() for line in fp]
 
 dirs = {}
 
-curr_dir = []
+curr_dir = ""
 for line in lines:
     if line[:5] == "$ cd ":
         if line[5:] == "..":
-            curr_dir.pop()
+            tmp = curr_dir.split("/")
+            if len(tmp) == 2:
+                curr_dir = "/"
+            else:
+                curr_dir = "/".join(curr_dir.split("/")[:-1])
         else:
-            curr_dir.append(line[5:])
+            if len(curr_dir) > 1:
+                curr_dir += "/" + line[5:]
+            else:
+                curr_dir += line[5:]
     elif line[:4] != "$ ls":
-        if curr_dir[-1] not in dirs:
-            dirs[curr_dir[-1]] = [line]
+        if curr_dir not in dirs:
+            dirs[curr_dir] = [line]
         else:
-            dirs[curr_dir[-1]].append(line)
-
-for d in dirs:
-    print(d, dirs[d])
-
-print()
+            dirs[curr_dir].append(line)
 
 sizes = {}
 def recurse(d):
@@ -29,12 +30,15 @@ def recurse(d):
     for y in dirs[d]:
         if y[:4] == "dir ":
             n = y[4:]
-            if n not in sizes:
-                recurse(n)
-            sizes[d] += sizes[n]
+            if d+n not in sizes:
+                if d == "/":
+                    recurse(d+n)
+                    sizes[d] += sizes[d+n]
+                else:
+                    recurse(d+"/"+n)
+                    sizes[d] += sizes[d+"/"+n]
         else:
             sizes[d] += int(y.split()[0])
-    print(d + "  :  " + str(sizes[d]))
 
 recurse('/')
 
@@ -45,5 +49,9 @@ for s in sizes:
 
 print(tot)
 
-# incorrect guesses
-# 1098082
+max_size = 70000000
+for s in sizes:
+    if (30000000 - 70000000 + sizes["/"]) < sizes[s] < max_size:
+        max_size = sizes[s]
+
+print(max_size)
