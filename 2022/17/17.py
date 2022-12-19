@@ -1,7 +1,11 @@
-with open("input", "r") as fp:
-    lines = [line.strip() for line in fp][0]
+import time
 
-b_size = 5000
+with open("input", "r") as fp:
+    directions = [line.strip() for line in fp][0]
+
+start_time = time.time()
+
+b_size = 500000
 
 rocks = [[['@','@','@','@']],\
 
@@ -20,7 +24,8 @@ rocks = [[['@','@','@','@']],\
         
         [['@','@'],\
         ['@','@']]]
-rock_size = [(1, 4), (3, 3), (3, 3), (4, 1), (2, 2)]
+        
+print(len(directions))
 
 def print_board():
     found_piece = False
@@ -79,9 +84,6 @@ def find_top(t):
         if '#' not in board[j] and '@' not in board[j]:
             return j - 3
 
-    tmp = 0
-    return
-
 def solidify(pos, r_idx):
     y, x = pos
     rock = rocks[r_idx % len(rocks)]
@@ -95,17 +97,44 @@ def solidify(pos, r_idx):
 r_idx = 0
 dir_idx = 0
 rock_pos = (-1, -1)
+flag = 0
 while True:
+    if (dir_idx%len(directions) == 0):
+        print(f"Dir reset {dir_idx}")
+    if (dir_idx%len(directions) == 59 and r_idx%len(rocks) == 4):
+        print("Flag")
+        print(time.time() - start_time)
+        print(dir_idx, r_idx)
+        if flag == 1:
+            exit(0)
+        flag += 1
     # place rock
     if rock_pos == (-1, -1):
         if r_idx == 2023:
-            print(b_size - find_top(top-2) - 6)
-        move = lines[dir_idx % len(lines)]
+            print(f"Solution 1: {b_size - find_top(top-2) - 6}")
+
+        # place new piece
+        rock_pos = (top - len(rocks[r_idx % len(rocks)]) + 1, 2)
+        board_add(rock_pos, r_idx)
+        # print_board()
+
+        # move new piece laterally
+        old_rock_pos = rock_pos
+        move = directions[dir_idx % len(directions)]
         if move == "<":
-            rock_pos = (top - len(rocks[r_idx % len(rocks)]) + 1, 1)
+            try:
+                rock_pos = (top - len(rocks[r_idx % len(rocks)]) + 1, 1)
+            except:
+                print(f"Error:  {r_idx}, {dir_idx}")
+                exit(0)
         else:
-            rock_pos = (top - len(rocks[r_idx % len(rocks)]) + 1, 3)
+            try:
+                rock_pos = (top - len(rocks[r_idx % len(rocks)]) + 1, 3)
+            except:
+                print(f"Error:  {r_idx}, {dir_idx}")
+                exit(0)
         dir_idx += 1
+        board_clear(old_rock_pos, r_idx)
         board_add(rock_pos, r_idx)
         # print("Place and lateral")
         # print_board()
@@ -120,10 +149,9 @@ while True:
     else:
         # We came to rest on another piece
         solidify(rock_pos, r_idx)
-        #print_board()
+        # print_board()
         rock_pos = (-1, -1)
         top = find_top(top-2)
-        #print(b_size - top - 4)
         r_idx = r_idx + 1
         continue
 
@@ -131,7 +159,7 @@ while True:
     # print_board()
         
     # mov rock sideways
-    move = lines[dir_idx % len(lines)]
+    move = directions[dir_idx % len(directions)]
     if move == "<":
         n_rock_pos = (rock_pos[0], rock_pos[1]-1)
     else:
@@ -149,7 +177,7 @@ while True:
     # We hit the floor
     if (len(rocks[r_idx % len(rocks)]) - 1) + rock_pos[0] == floor:
         solidify(rock_pos, r_idx)
-        #print_board()
+        # print_board()
         rock_pos = (-1, -1)
         top = find_top(top-2)
         r_idx = r_idx + 1

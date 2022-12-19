@@ -1,7 +1,4 @@
 from copy import deepcopy
-import time
-
-start_time = time.time()
 
 with open("input", "r") as fp:
     lines = [line.strip() for line in fp]
@@ -37,198 +34,120 @@ for z in ["AA"]+pos_flow:
                 seen.append(t)
                 queue.append([t, dist + 1])
 
-for a, b in graph.items():
-    print(a, b)
+DP = {}
+def recursion(current_position, time_left, open_valves):
+    # If all valves are open, calculate the rest of the time and return
+    if time_left == 0:
+        return 0
+
+    DPkey = deepcopy(open_valves)
+    DPkey.sort()
+    DPkey = ''.join(DPkey) + current_position + str(time_left)
+
+    if DPkey in DP:
+        return DP[DPkey]
+
+    ret_flows = []
+    for next_position, t in graph[current_position].items():
+        # If we have opened this valve already, skip
+        if next_position in open_valves:
+            continue
+        # If we have time to open this valve, open it
+        if time_left >= (t+1):
+
+            # add next position to new open valves
+            new_open_valves = deepcopy(open_valves)
+            new_open_valves.append(next_position)
+
+            # run recursion with new_position, subtracted time, and new open valves
+            new_total_flow = recursion(next_position, time_left - (t+1), new_open_valves)
+
+            # calculate the additonal flow for moving to this position and opening valve
+            for ov in open_valves:
+                new_total_flow += flow[ov] * (t+1)
+
+            # append to returned flows from other paths
+            ret_flows.append(new_total_flow)
+    
+    # Calculate the total flow if we don't open any more valves
+    new_total_flow = 0
+    for ov in open_valves:
+        new_total_flow += flow[ov] * (time_left)
+    ret_flows.append(new_total_flow)
+
+    max_flow = max(ret_flows)
+    DP[DPkey] = max_flow
+    return max_flow
+        
 
 # Calculate max flow
-max_flow = 0
-max_time = 30
-# curr_pos, tot_flow, curr_time, open_valvs
-next_op = [["AA", 0, 30, []]]
-debug = 0
-memoization = {}
-while next_op:
-    # get next value from queue
-    curr_pos, tot_flow, curr_time, open_valvs = next_op.pop()
-
-    # check if we have opened all valvs
-    if len(open_valvs) == len(pos_flow):
-        for v in open_valvs:
-            tot_flow += (flow[v] * curr_time)
-        if tot_flow > max_flow:
-            max_flow = tot_flow
-        continue
-
-    # loop through each next node in graph
-    for k, v in graph[curr_pos].items():
-        if k in open_valvs:
-            continue
-        # if we have more time left than distance to next node
-        if curr_time >= (v + 1):
-            new_tot_flow = tot_flow
-            # update total flow for the passed minutes
-            for valv in open_valvs:
-                new_tot_flow += (flow[valv] * (v + 1))
-            new_open_valvs = deepcopy(open_valvs)
-            new_open_valvs.append(k)
-            new_time = curr_time - (v + 1)
-
-            # memoization based on previously found valves
-            key = new_open_valvs
-            key.sort()
-            key = ''.join(key)
-            if key not in memoization:
-                memoization[key] = (new_tot_flow, new_time)
-                next_op.append([k, new_tot_flow, new_time, new_open_valvs])
-            else:
-                best_tot_flow, best_time = memoization[key]
-                if new_tot_flow > best_tot_flow:
-                    if new_time >= best_time:
-                        memoization[key] = (new_tot_flow, new_time)
-                    next_op.append([k, new_tot_flow, new_time, new_open_valvs])
-                else:
-                    if new_time > best_time:
-                        next_op.append([k, new_tot_flow, new_time, new_open_valvs])
-            # next_op.append([k, new_tot_flow, new_time, new_open_valvs])
-
-        else:
-            tf = tot_flow
-            for t in range(curr_time):
-                if curr_time - t == 0:
-                    if tf > max_flow:
-                        max_flow = tf
-                    break
-                for valv in open_valvs:
-                    tf += flow[valv]
-            if tf > max_flow:
-                max_flow = tf
-
+max_flow = recursion("AA", 30, [])
 print(max_flow)
-print(time.time() - start_time)
+
 
 # Part 2
+# we now keep track of 2 different instances of valves
+# open_valves are valves that are opened across all players.  A player will skip the next valve if already open
+# player_valves are valves only opened by the current player.  Used to keep track of total flow for that player
+
+# We also need to use dynamic programming
+DP = {}
+def recursion2(current_position, time_left, open_valves, player_valves, player):
+
+    if time_left == 0:
+        # If we have finished me, switch to the elephant
+        if player == 0:
+            return recursion2("AA", 26, deepcopy(open_valves), [], 1)
+        # If we have run through all players, return 0
+        if player == 1:
+            return 0
+
+    pv = deepcopy(player_valves)
+    pv.sort()
+    ov = deepcopy(open_valves)
+    ov.sort()
+    DPkey = ''.join(ov) + ' ' + ''.join(pv) + ' ' + current_position + ' ' + str(time_left)
+    # DPkey = ''.join(pv) + ' ' + current_position + ' ' + str(time_left)
+    if DPkey in DP:
+        return DP[DPkey]
+
+    # store possible flow values down each path
+    ret_flows = []
+    # for each other valve with flow > 0
+    for next_position, t in graph[current_position].items():
+        # If we have opened this valve already, skip
+        if next_position in open_valves:
+            continue
+        # If we have time to open this valve, open it
+        if time_left >= (t+1):
+
+            # add next position to new open valves and to the player valves
+            new_open_valves = deepcopy(open_valves)
+            new_open_valves.append(next_position)
+            new_player_valves = deepcopy(player_valves)
+            new_player_valves.append(next_position)
+
+            # run recursion2 with new_position, subtracted time, and new open valves
+            new_total_flow = recursion2(next_position, time_left - (t+1), new_open_valves, new_player_valves, player)
+
+            # calculate the additonal flow for moving to this position and opening valve
+            for pv in player_valves:
+                new_total_flow += flow[pv] * (t+1)
+
+            # append to returned flows from other paths
+            ret_flows.append(new_total_flow)
+    
+    # Calculate the total flow if we don't open any more valves
+    # This time we need to run recursion incase the elephant is up next
+    new_total_flow = recursion2(current_position, 0, deepcopy(open_valves), deepcopy(player_valves), player)
+    for pv in player_valves:
+        new_total_flow += flow[pv] * (time_left)
+    ret_flows.append(new_total_flow)
+
+    max_flow = max(ret_flows)
+    DP[DPkey] = max_flow
+    return max_flow
+        
+
 # Calculate max flow
-max_flow = 0
-max_time = 30
-# curr_pos, tot_flow, curr_time, open_valvs
-next_op = [["AA", 0, 26, [], "AA", 0, 26, [], []]]
-debug = 0
-memoization = {}
-while next_op:
-    # get next value from queue
-    my_curr_pos, my_tot_flow, my_curr_time, my_vals, el_curr_pos, el_tot_flow, el_curr_time, el_vals, open_valvs = next_op.pop()
-
-    # check if we have opened all valvs
-    if len(open_valvs) == len(pos_flow):
-        for v in my_vals:
-            my_tot_flow += (flow[v] * my_curr_time)
-        for v in el_vals:
-            el_tot_flow += (flow[v] * el_curr_time)
-        if (my_tot_flow + el_tot_flow) > max_flow:
-            max_flow = my_tot_flow + el_tot_flow
-            print(max_flow)
-        continue
-
-    # check if we both ran out of time
-    if my_curr_time == 0 and el_curr_time == 0:
-        for v in my_vals:
-            my_tot_flow += (flow[v] * my_curr_time)
-        for v in el_vals:
-            el_tot_flow += (flow[v] * el_curr_time)
-        if (my_tot_flow + el_tot_flow) > max_flow:
-            max_flow = my_tot_flow + el_tot_flow
-            print(max_flow)
-        continue
-
-    open_valvs_2 = deepcopy(open_valvs)
-
-    # loop through each next node in graph
-    if my_curr_time > 0 and len(my_vals) < len(pos_flow) - 2:
-        my_sent = False
-        for k, v in graph[my_curr_pos].items():
-            if k in open_valvs:
-                continue
-            # if we have more time left than distance to next node
-            if my_curr_time >= (v + 1):
-                my_new_tot_flow = my_tot_flow
-                # update total flow for the passed minutes
-                for valv in my_vals:
-                    my_new_tot_flow += (flow[valv] * (v + 1))
-                new_open_valvs = deepcopy(open_valvs)
-                new_my_vals = deepcopy(my_vals)
-                new_open_valvs.append(k)
-                new_my_vals.append(k)
-                my_new_time = my_curr_time - (v + 1)
-
-                # memoization based on previously found valves
-                # key = new_open_valvs
-                # key.sort()
-                # key = ''.join(key)
-                # if key not in memoization:
-                #     memoization[key] = (my_new_tot_flow, my_new_time)
-                #     next_op.append([k, my_new_tot_flow, my_new_time, new_my_vals, el_curr_pos, el_tot_flow, el_curr_time, el_vals, new_open_valvs])
-                # else:
-                #     best_tot_flow, best_time = memoization[key]
-                #     if my_new_tot_flow > best_tot_flow:
-                #         if my_new_time >= best_time:
-                #             memoization[key] = (my_new_tot_flow, my_new_time)
-                #         next_op.append([k, my_new_tot_flow, my_new_time, new_my_vals, el_curr_pos, el_tot_flow, el_curr_time, el_vals, new_open_valvs])
-                #     else:
-                #         if my_new_time > best_time:
-                #             next_op.append([k, my_new_tot_flow, my_new_time, new_my_vals, el_curr_pos, el_tot_flow, el_curr_time, el_vals, new_open_valvs])
-                next_op.append([k, my_new_tot_flow, my_new_time, new_my_vals, el_curr_pos, el_tot_flow, el_curr_time, el_vals, new_open_valvs])
-            elif not my_sent:
-                tf = my_tot_flow
-                for t in range(my_curr_time):
-                    for valv in my_vals:
-                        tf += flow[valv]
-                my_sent = True
-                next_op.append([k, my_new_tot_flow, 0, new_my_vals, el_curr_pos, el_tot_flow, el_curr_time, el_vals, new_open_valvs])
-
-    open_valvs = open_valvs_2
-
-    # elephant loops through each next node in graph
-    if el_curr_time > 0 and len(el_vals) < len(pos_flow) - 2:
-        el_sent = False
-        for k, v in graph[el_curr_pos].items():
-            if k in open_valvs:
-                continue
-            # if we have more time left than distance to next node
-            if el_curr_time >= (v + 1):
-                el_new_tot_flow = el_tot_flow
-                # update total flow for the passed minutes
-                for valv in el_vals:
-                    el_new_tot_flow += (flow[valv] * (v + 1))
-                new_open_valvs = deepcopy(open_valvs)
-                new_open_valvs.append(k)
-                new_el_vals = deepcopy(el_vals)
-                new_el_vals.append(k)
-                el_new_time = el_curr_time - (v + 1)
-
-                # memoization based on previously found valves
-                # key = new_open_valvs
-                # key.sort()
-                # key = ''.join(key)
-                # if key not in memoization:
-                #     memoization[key] = (el_new_tot_flow, el_new_time)
-                #     next_op.append([k, my_new_tot_flow, my_new_time, new_my_vals, el_curr_pos, el_tot_flow, el_curr_time, el_vals, new_open_valvs])
-                # else:
-                #     best_tot_flow, best_time = memoization[key]
-                #     if el_new_tot_flow > best_tot_flow:
-                #         if el_new_time >= best_time:
-                #             memoization[key] = (el_new_tot_flow, el_new_time)
-                #         next_op.append([k, my_new_tot_flow, my_new_time, new_my_vals, el_curr_pos, el_tot_flow, el_curr_time, el_vals, new_open_valvs])
-                #     else:
-                #         if el_new_time > best_time:
-                #             next_op.append([k, my_new_tot_flow, my_new_time, new_my_vals, el_curr_pos, el_tot_flow, el_curr_time, el_vals, new_open_valvs])
-                next_op.append([my_curr_pos, my_tot_flow, my_curr_time, my_vals, k, el_new_tot_flow, el_new_time, new_el_vals, new_open_valvs])
-            elif not el_sent:
-                tf = el_tot_flow
-                for t in range(el_curr_time):
-                    for valv in el_vals:
-                        tf += flow[valv]
-                el_sent = True
-                next_op.append([my_curr_pos, my_tot_flow, my_curr_time, my_vals, k, el_new_tot_flow, 0, new_el_vals, new_open_valvs])
-
-print(max_flow)
-print(time.time() - start_time)
+print(recursion2("AA", 26, [], [], 0))
