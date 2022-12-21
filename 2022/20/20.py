@@ -45,6 +45,7 @@ for i, v in enumerate(order):
         n_next.prev = n_prev
 
         pos = n_prev
+        n_value = abs(n_value) % (len(order) - 1)
         for steps in range(n_value):
             pos = pos.next
         pos_plus = pos.next
@@ -59,7 +60,8 @@ for i, v in enumerate(order):
         n_next.prev = n_prev
 
         pos = n_next
-        for steps in range(abs(n_value)):
+        n_value = abs(n_value) % (len(order) - 1)
+        for steps in range(n_value):
             pos = pos.prev
         pos_minus = pos.prev
         pos.prev = v
@@ -99,13 +101,10 @@ for i, v in enumerate(order):
     else:
         v.next = order[i+1]
 
-# print_list()
-# tmp = 0
-
+start = order[0]
 # starting with the first value, rearrange positions
 for x in range(10):
     for i, v in enumerate(order):
-        print(i)
         n_value = v.data
         n_prev = v.prev
         n_next = v.next
@@ -116,6 +115,7 @@ for x in range(10):
             n_next.prev = n_prev
 
             pos = n_prev
+            n_value = abs(n_value) % (len(order) - 1)
             for steps in range(n_value):
                 pos = pos.next
             pos_plus = pos.next
@@ -130,16 +130,14 @@ for x in range(10):
             n_next.prev = n_prev
 
             pos = n_next
-            for steps in range(abs(n_value)):
+            n_value = abs(n_value) % (len(order) - 1)
+            for steps in range(n_value):
                 pos = pos.prev
             pos_minus = pos.prev
             pos.prev = v
             pos_minus.next = v
             v.next = pos
             v.prev = pos_minus
-
-    # print_list()
-    # tmp = 0
 
 # find 0
 zero = order[0]
