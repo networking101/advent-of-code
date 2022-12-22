@@ -56,8 +56,6 @@ def recursion_up(m, m_solution, prev):
         next_key = find_key(m)
         return recursion_up(next_key, m_solution, m)
 
-    
-
     first, operation, second = monkeys[m]
     first_flag = False
     if first == prev:
