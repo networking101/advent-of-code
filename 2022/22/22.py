@@ -1,20 +1,23 @@
 import numpy as np
 from copy import deepcopy
 
-with open("input2", "r") as fp:
+puzzle = "input"
+with open(puzzle, "r") as fp:
     lines = [line.rstrip() for line in fp]
 
-def print_board(pos=None, face=None):
+def print_board(pos=None, facing=None):
+    print(f"Facing: {facing}")
+    print(pos)
     for j, y in enumerate(cube[pos[0]]):
         for i, x in enumerate(y):
-            if pos and face and pos[1] == j and pos[2] == i:
-                if face == 0:
+            if pos != None and facing != None and pos[1] == j and pos[2] == i:
+                if facing == 0:
                     print('^', end='')
-                if face == 1:
+                if facing == 1:
                     print('>', end='')
-                if face == 2:
+                if facing == 2:
                     print('v', end='')
-                if face == 3:
+                if facing == 3:
                     print('<', end='')
             else:
                 print(x, end='')
@@ -164,76 +167,70 @@ while directions or distances:
 
 print((pos[0]+1) * 1000 + (pos[1]+1) * 4 + (facing-1) % 4)
 
-# # create board and paths
-# board = []
-# path = ""
-# b = True
-# maxx = 0
-# for l in lines:
-#     if not l:
-#         b = False
-#     elif b:
-#         if (len(l)-1) > maxx:
-#             maxx = len(l)-1
-#         board.append(list(l))
-#     else:
-#         path = l
-# maxy = len(board)-1
-
-# # pad right
-# for i, y in enumerate(board):
-#     board[i] = y + [' '] * (maxx - len(y) + 1)
-
-
 # Part 2
-# example
 distances = orig_distances
 directions = orig_directions
 
-c_size = 4
-face_front = []
-face_bottom = []
-face_top = []
-face_back = []
-face_left = []
-face_right = []
-# for y in range(c_size):
-#     face_front.append([''] * c_size)
-#     face_bottom.append([''] * c_size)
-#     face_top.append([''] * c_size)
-#     face_back.append([''] * c_size)
-#     face_left.append([''] * c_size)
-#     face_right.append([''] * c_size)
-
-for y in range(c_size):
-    face_front.append([''] * c_size)
-    face_bottom.append([''] * c_size)
-    face_top.append([''] * c_size)
-    face_back.append([''] * c_size)
-    face_left.append([''] * c_size)
-    face_right.append([''] * c_size)
-    for x in range(c_size):
-        face_front[y][x] = board[y][x+8]
-        face_bottom[y][x] = board[y+4][x+8]
-        face_top[y][x] = board[y+4][x]
-        face_back[y][x] = board[y+8][x+8]
-        face_left[y][x] = board[y+4][x+4]
-        face_right[y][x] = board[y+8][x+12]
-face_top = np.rot90(face_top, 2)
-face_back = np.rot90(face_back, 2)
-face_left = np.rot90(face_left, 1)
-face_right = np.rot90(face_right, 2)
-cube = [face_front, face_top, face_bottom, face_left, face_right, face_back]
+# example
+if puzzle == "input2":
+    c_size = 4
+    face_front = []
+    face_bottom = []
+    face_top = []
+    face_back = []
+    face_left = []
+    face_right = []
+    for y in range(c_size):
+        face_front.append([''] * c_size)
+        face_bottom.append([''] * c_size)
+        face_top.append([''] * c_size)
+        face_back.append([''] * c_size)
+        face_left.append([''] * c_size)
+        face_right.append([''] * c_size)
+        for x in range(c_size):
+            face_front[y][x] = board[y][x+8]
+            face_bottom[y][x] = board[y+4][x+8]
+            face_top[y][x] = board[y+4][x]
+            face_back[y][x] = board[y+8][x+8]
+            face_left[y][x] = board[y+4][x+4]
+            face_right[y][x] = board[y+8][x+12]
+    face_top = np.rot90(face_top, 2)
+    face_left = np.rot90(face_left, 3)
+    face_right = np.rot90(face_right, 2)
+    cube = [face_front, face_top, face_bottom, face_left, face_right, face_back]
 
 # puzzle input
-# c_size = 50
-# TODO
+if puzzle == "input":
+    c_size = 50
+    face_front = []
+    face_bottom = []
+    face_top = []
+    face_back = []
+    face_left = []
+    face_right = []
+    for y in range(c_size):
+        face_front.append([''] * c_size)
+        face_bottom.append([''] * c_size)
+        face_top.append([''] * c_size)
+        face_back.append([''] * c_size)
+        face_left.append([''] * c_size)
+        face_right.append([''] * c_size)
+        for x in range(c_size):
+            face_front[y][x] = board[y][x+50]
+            face_bottom[y][x] = board[y+50][x+50]
+            face_top[y][x] = board[y+150][x]
+            face_back[y][x] = board[y+100][x+50]
+            face_left[y][x] = board[y+100][x]
+            face_right[y][x] = board[y][x+100]
+    face_top = np.rot90(face_top, 1)
+    face_left = np.rot90(face_left, 2)
+    cube = [face_front, face_top, face_bottom, face_left, face_right, face_back]
 
 def check_up(f, y, x):
     lf = f
     ly = y
     lx = x
-    if y < 0:
+    if y <= 0:
         if f == 0:
             tf = 1
             ty = c_size - 1
@@ -271,18 +268,20 @@ def check_up(f, y, x):
             return (tf, ty, tx)
         if f == 5:
             tf = 2
-            ty = c_size
+            ty = c_size - 1
             tx = lx
             if cube[tf][ty][tx] == '#':
                 return (lf, ly, lx)
             return (tf, ty, tx)
+    if cube[lf][ly - 1][lx] == '#':
+        return (lf, ly, lx)
     return (lf, ly - 1, lx)
 
 def check_down(f, y, x):
     lf = f
     ly = y
     lx = x
-    if y > c_size - 1:
+    if y >= c_size - 1:
         if f == 0:
             tf = 2
             ty = 0
@@ -313,7 +312,7 @@ def check_down(f, y, x):
             return (tf, ty, tx)
         if f == 4:
             tf = 2
-            ty = c_size - (lx + 1)
+            ty = lx
             tx = c_size - 1
             if cube[tf][ty][tx] == '#':
                 return (lf, ly, lx)
@@ -325,13 +324,15 @@ def check_down(f, y, x):
             if cube[tf][ty][tx] == '#':
                 return (lf, ly, lx)
             return (tf, ty, tx)
+    if cube[lf][ly + 1][lx] == '#':
+        return (lf, ly, lx)
     return (lf, ly + 1, lx)
 
 def check_right(f, y, x):
     lf = f
     ly = y
     lx = x
-    if x > c_size - 1:
+    if x >= c_size - 1:
         if f == 0:
             tf = 4
             ty = ly
@@ -369,18 +370,20 @@ def check_right(f, y, x):
             return (tf, ty, tx)
         if f == 5:
             tf = 4
-            ty = c_size - (ty + 1)
+            ty = c_size - (ly + 1)
             tx = c_size - 1
             if cube[tf][ty][tx] == '#':
                 return (lf, ly, lx)
             return (tf, ty, tx)
+    if cube[lf][ly][lx + 1] == '#':
+        return (lf, ly, lx)
     return (lf, ly, lx + 1)
 
 def check_left(f, y, x):
     lf = f
     ly = y
     lx = x
-    if x > c_size - 1:
+    if x <= 0:
         if f == 0:
             tf = 3
             ty = ly
@@ -411,8 +414,8 @@ def check_left(f, y, x):
             return (tf, ty, tx)
         if f == 4:
             tf = 0
-            ty = c_size - 1
-            tx = lx
+            ty = ly
+            tx = c_size - 1
             if cube[tf][ty][tx] == '#':
                 return (lf, ly, lx)
             return (tf, ty, tx)
@@ -423,10 +426,11 @@ def check_left(f, y, x):
             if cube[tf][ty][tx] == '#':
                 return (lf, ly, lx)
             return (tf, ty, tx)
+    if cube[lf][ly][lx - 1] == '#':
+        return (lf, ly, lx)
     return (lf, ly, lx - 1)
 
 def change_direction(src, dst):
-    print(f"Change direction {(src, dst)}")
     if src == 0:
         if dst == 1:
             return 0
@@ -511,41 +515,42 @@ itteration = 0
 while directions or distances:
     d = distances.pop(0)
     for _ in range(d):
-        if facing == 0 and coordinates[pos][0] != pos:
+        if facing == 0:
             n_pos = coordinates[pos][0]
+            if n_pos == pos:
+                break
             if pos[0] != n_pos[0]:
                 facing = change_direction(pos[0], n_pos[0])
-        if facing == 1 and coordinates[pos][1] != pos:
+        elif facing == 1:
             n_pos = coordinates[pos][1]
+            if n_pos == pos:
+                break
             if pos[0] != n_pos[0]:
                 facing = change_direction(pos[0], n_pos[0])
-        if facing == 2 and coordinates[pos][2] != pos:
+        elif facing == 2:
             n_pos = coordinates[pos][2]
+            if n_pos == pos:
+                break
             if pos[0] != n_pos[0]:
                 facing = change_direction(pos[0], n_pos[0])
-        if facing == 3 and coordinates[pos][3] != pos:
+        elif facing == 3:
             n_pos = coordinates[pos][3]
+            if n_pos == pos:
+                break
             if pos[0] != n_pos[0]:
                 facing = change_direction(pos[0], n_pos[0])
                 
         pos = n_pos
-    
-    print_board(pos, facing)
-    if itteration == 0:
-        exit(0)
 
     if directions:
         d = directions.pop(0)
-        # print(d)
         if d == 'R':
             facing = (facing + 1) % 4
         else:
             facing = (facing - 1) % 4
     
-    print_board(pos, facing)
-    if itteration == 0:
-        exit(0)
     itteration += 1
 
-print(pos)
-print((pos[0]+1) * 1000 + (pos[1]+1) * 4 + (facing-1) % 4)
+if pos[0] == 1:
+    print((150 + pos[2] + 1) * 1000 + (50 - pos[1]) * 4 + facing % 4)
+
