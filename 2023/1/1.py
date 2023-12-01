@@ -3,43 +3,32 @@ with open("input", "r") as fp:
 
 count = 0
 
-for l in lines:
-    a = 0
-    b = 0
-    for i in l:
-        if i.isnumeric():
-            a = i
-            break
-    for i in l[::-1]:
-        if i.isnumeric():
-            b = i
-            break
+for line in lines:
+    found = []
+    for c in line:
+        if c.isnumeric():
+            found.append(c)
 
-    count += int(a+b)
+    count += int(found[0] + found[-1])
 
 print(count)
 
 numbers = {"one":"1", "two":"2", "three":"3", "four":"4", "five":"5", "six":"6", "seven":"7", "eight":"8", "nine":"9"}
-
 count = 0
 
-for l in lines:
+for line in lines:
     found = []
-    last = 0
-    for i, x in enumerate(l):
-        if x.isnumeric():
-            found.append(x)
-            last = i
+    start = 0
+    for i, c in enumerate(line):
+        if c.isnumeric():
+            found.append(c)
+            start = i
             continue
-        for n in numbers:
-            if n in l[last:i+1]:
-                last = i
-                found.append(numbers[n])
+        for k, v in numbers.items():
+            if k in line[start:i+1]:
+                start = i
+                found.append(v)
 
-    print(found)
-    if len(found) >= 2:
-        count += int(found[0] + found[-1])
-    elif len(found) == 1:
-        count += int(found[0] + found[0])
+    count += int(found[0] + found[-1])
 
 print(count)
