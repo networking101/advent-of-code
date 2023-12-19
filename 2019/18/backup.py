@@ -19,11 +19,14 @@ for j, y in enumerate(grid):
         if x.isupper():
             doors[x] = (j, i)
 
-# find doors between keys
-def find_doors(g, key, curr_pos, drs):
+# find distances between keys
+queue = ['@']
+def recursive(g, key, curr_pos, count, drs):
     y, x = curr_pos
     if g[y][x] in keys and g[y][x] != key:
         locked_doors[key][g[y][x]] = drs
+        distances[key][g[y][x]] = count
+        queue.append(g[y][x])
         return
     if g[y][x].isalpha() and g[y][x].isupper() and g[y][x] != key:
         drs.append(g[y][x])
@@ -32,30 +35,22 @@ def find_doors(g, key, curr_pos, drs):
         yy = y + pos[0]
         xx = x + pos[1]
         if g[yy][xx] != '#':
-            find_doors(g, key, [yy, xx], deepcopy(drs))
+            recursive(g, key, [yy, xx], count + 1, deepcopy(drs))
     return
 
-# find distances between keys
-def find_distances(g, key):
-    y, x = keys[key]
-    queue = [[y, x, 0]]
-    while queue:
-        y, x, cnt = queue.pop(0)
-        if g[y][x] in keys and g[y][x] != key:
-            distances[key][g[y][x]] = cnt
-            continue
-        g[y][x] = '#'
-        for i, pos in enumerate([[-1, 0], [0, 1], [1, 0], [0, -1]]):
-            yy = y + pos[0]
-            xx = x + pos[1]
-            if g[yy][xx] != '#':
-                queue.append([yy, xx, cnt + 1])
-                
-    return
+found = []
+while queue:
+    key = queue.pop(0)
+    if key not in found:
+        recursive(deepcopy(grid), key, keys[key], 0, [])
+        found.append(key)
 
-for key in keys:
-    find_doors(deepcopy(grid), key, keys[key], [])
-    find_distances(deepcopy(grid), key)
+# for k, v in distances.items():
+#     print(k, v)
+# print()
+# for k, v in locked_doors.items():
+#     print(k, v)
+# print()
 
 # find distances through all doors
 full_distances = {}

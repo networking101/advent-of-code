@@ -62,7 +62,7 @@ def minwalk(grid, starts, havekeys):
     return ans
 
 
-with open("input3") as f:
+with open("input") as f:
     grid = [l.rstrip('\n') for l in f]
 
     starts = []
