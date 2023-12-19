@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-with open("input", "r") as fp:
+with open("part1_input", "r") as fp:
     lines = [line.strip() for line in fp]
 
 grid = [[z for z in line] for line in lines]
@@ -50,7 +50,6 @@ def find_distances(g, key):
             xx = x + pos[1]
             if g[yy][xx] != '#':
                 queue.append([yy, xx, cnt + 1])
-                
     return
 
 for key in keys:
@@ -75,13 +74,6 @@ for key in keys:
             curr_door_dict[dk] = locked_doors[k][dk] + drs
             kys.append(dk)
             queue.append([dk, dv + dist, deepcopy(locked_doors[k][dk] + drs), kys])
-
-# for k, v in full_distances.items():
-#     print(k, v)
-# print()
-# for k, v in full_doors.items():
-#     print(k, v)
-# print()
 
 def check_doors(keys, doors):
     for d in doors:
@@ -113,10 +105,7 @@ def recursive3(curr_key, found_keys):
 
     # print(this_count)
     DP[DP_key] = min(this_count)
-
     return min(this_count)
 
 count1 = recursive3('@', ['@'])
 print(count1)
-
-#3778
