@@ -53,7 +53,6 @@ for bn, brick in enumerate(bricks):
 
     for z in zrange:
         # check area coverage of layer of block
-        tmp = 0
         curr_level = [[0]*(x_size+1) for _ in range(y_size+1)]
         for y in yrange:
             for x in xrange:
@@ -164,8 +163,7 @@ for bn, resting_brick in enumerate(resting_bricks):
 
         # recurse to find all bricks that will move
         if sprt[0] not in chain_reaction_list:
-            tmp = chain_reaction(sprt[0])
-            count2 += tmp
+            count2 += chain_reaction(sprt[0])
             chain_reaction_list.append(sprt[0])
 
 print(len(bricks) - len(list(dict.fromkeys(supporting_bricks))))

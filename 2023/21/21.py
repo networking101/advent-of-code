@@ -88,7 +88,6 @@ if edge_steps > len(oggrid):
 # get cut squares
 resout = 0
 insize = (distance + 1) % len(oggrid)
-# if insize != 0:
 insize += len(oggrid) - 2
 outsize = insize % len(oggrid)
 outer = num_skip + 1
