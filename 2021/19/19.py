@@ -1,70 +1,68 @@
 from math import *
+from collections import Counter
 
-with open("input", "r") as fp:
+with open("input2", "r") as fp:
     lines = [line.strip() for line in fp]
 
 scanners = {}
-scannersDist = {}
+num_beacons = 0     # 127
+curr = -1
+for line in lines:
+    if not line:
+        continue
 
-while True:
-    scannerNum = int(lines.pop(0).split(" ")[2])
-    tmp = {}
-    line = lines.pop(0)
-    index = 0
-    while line and lines:
-        tmp[index] = [int(x) for x in line.split(',')]
-        line = lines.pop(0)
-        index += 1
-    if not lines:
-        break
-    scanners[scannerNum] = tmp
-tmp[index] = [int(x) for x in line.split(',')]
-scanners[scannerNum] = tmp
+    elif 'scanner' in line:
+        _, _, num, _ = line.split()
+        num = int(num)
+        scanners[num] = []
+        curr = num
+    
+    else:
+        a, b, c = [int(z) for z in line.split(',')]
+        scanners[curr].append((a, b, c))
+        num_beacons += 1
 
-for s in scanners:
-    distDict = {}
-    for c in range(len(scanners[s])):
-        for d in range(c+1, len(scanners[s])):
-            if c == d:
-                continue
-            distance = sqrt((abs(scanners[s][c][0]) - abs(scanners[s][d][0]))**2 + (abs(scanners[s][c][1]) - abs(scanners[s][d][1]))**2 + (abs(scanners[s][c][2]) - abs(scanners[s][d][2]))**2)
-            distDict[(c, d)] = distance
-    scannersDist[s] = distDict
+all_beacon_pairs = []
 
-matches = {}
-for s1 in range(len(scanners)):
-    for s2 in range(s1+1, len(scanners)):
-        nmatches = []
-        for v1 in scannersDist[s1]:
-            for v2 in scannersDist[s2]:
-                if scannersDist[s1][v1] == scannersDist[s2][v2]:
-                    nmatches.append((v1, v2))
-        if len(nmatches) >= 12:
-            matches[(s1, s2)] = nmatches
+for k, v in scanners.items():
+    beacon_pairs = []
+    for j, y in enumerate(v):
+        for i, x in enumerate(v[j+1:]):
+            a, b, c = y
+            aa, bb, cc = x
+            beacon_pairs.append(abs(a - aa) ** 2 + abs(b - bb) ** 2 + abs(c - cc) ** 2)
 
-# first scanner is scanner 0.  All positions are fixed to its relative position
-for i in range(len(scanners)):
-    first = i
-    for j in matches:
-        if first != j[0]:
-            if first != j[1]:
-                continue
-            else:
-                second = j[0]
-        else:
-            second = j[1]
+    all_beacon_pairs.append(beacon_pairs)
 
-        scanMatch = matches[j]
-        for k in scanMatch:
-            if first == j[0]:
-                firstBeacon1 = k[0][0]
-                firstBeacon2 = k[0][1]
-                secondBeacon1 = k[1][0]
-                secondBeacon2 = k[1][1]
-            else:
-                secondBeacon1 = k[0][0]
-                secondBeacon2 = k[0][1]
-                firstBeacon1 = k[1][0]
-                firstBeacon2 = k[1][1]
+count_found = []
+count_not_found = 0
+for k, v in scanners.items():
+    beacon_pairs = []
+    for j, y in enumerate(v):
+        found = False
+        for i, x in enumerate(v[j+1:]):
+            a, b, c = y
+            aa, bb, cc = x
+            test = abs(a - aa) ** 2 + abs(b - bb) ** 2 + abs(c - cc) ** 2
 
-print("DEBUG")
+            num_found = 0
+            for ii, scan_group in enumerate(all_beacon_pairs):
+                if k == ii:
+                    continue
+                for jj in scan_group:
+                    if test == jj:
+                        found = True
+                        num_found += 1
+
+            if found:
+                count_found.append(num_found)
+                break
+        if not found:
+            count_not_found += 1
+
+print(count_found)
+print(len(count_found))
+tmp = Counter(count_found)
+for k, v in tmp.items():
+    print(k, v)
+print(count_not_found)
