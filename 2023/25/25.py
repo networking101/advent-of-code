@@ -1,10 +1,13 @@
 from copy import deepcopy
+import random
+from collections import Counter
 
 with open("input", "r") as fp:
     lines = [line.strip() for line in fp]
 
 components = {}
 connections = []
+nodes = []
 
 for line in lines:
     left, right = line.split(':')
@@ -14,6 +17,8 @@ for line in lines:
         components[left] += right
     else:
         components[left] = right
+    if left not in nodes:
+        nodes.append(left)
     
     for r in right:
         if (r, left) not in connections and (left, r) not in connections:
@@ -22,39 +27,72 @@ for line in lines:
             components[r].append(left)
         else:
             components[r] = [left]
+        if r not in nodes:
+            nodes.append(r)
 
-# for k, v in components.items():
-#     print(k, v)
-# print()
+pairs = {}    
+def find_end(curr, end, found, tf):
+    queue = [curr]
+    while queue:
+        curr = queue.pop(0)
+        if curr == end:
+            tf += deepcopy(found)
+            return
+        random.shuffle(components[curr])
+        for nxt in components[curr]:
+            if nxt not in found:
+                found.append(nxt)
+                queue.append((nxt))
 
-# for c in connections:
-#     print(c)
+def get_num_nodes(curr, removed):
+    found = [curr]
+    queue = [curr]
+    while queue:
+        curr = queue.pop(0)
+        random.shuffle(components[curr])
+        for nxt in components[curr]:
+            if nxt not in found and nxt not in removed:
+                found.append(nxt)
+                queue.append((nxt))
+    return len(found)
 
-def recursive():
-    return
-
-def separate_components(stuff, com):
-    for s in stuff:
-        left, right = s
-
-        if len(com[left]) == 1:
-            com.remove(left)
-        else:
-            com[left].remove(right)
-        if len(com[right]) == 1:
-            com.remove(right)
-        else:
-            com[right].remove(left)
-
-for i, a in enumerate(connections):
-    for j, b in enumerate(connections):
-        l, r = b
-        if l in a or r in a or j <= i:
+print("Stop running when you think you found the answer")
+while True:
+    count = 0
+    total_found = []
+    while count < 300:
+        start = random.randint(0, len(nodes) - 1)
+        end = random.randint(0, len(nodes) - 1)
+        if start == end:
             continue
-        for k, c in enumerate(connections):
-            l, r = c
-            if l in a or l in b or r in a or r in b or k <= i or k <= j:
-                continue
-            assert a != b != c
-            this_com = deepcopy(components)
-            # separate_components([a, b, c], this_com)
+
+        start = nodes[start]
+        end = nodes[end]
+        find_end(start, end, [start], total_found)
+        count += 1
+
+    removed = []
+    tf = Counter(total_found)
+    tf = [(v, k) for k, v in tf.items()]
+    tf.sort(reverse=True)
+    count = 0
+    for v, k in tf:
+        removed.append(k)
+        count += 1
+        if count == 6:
+            break
+
+    a = nodes[random.randint(0, len(nodes) - 1)]
+    while a in removed:
+        a = nodes[random.randint(0, len(nodes) - 1)]
+    a_len = get_num_nodes(a, removed)
+
+
+    b = nodes[random.randint(0, len(nodes) - 1)]
+    while a in removed:
+        b = nodes[random.randint(0, len(nodes) - 1)]
+    b_len = get_num_nodes(b, removed)
+    
+    if b_len + a_len + 6 == len(nodes):
+        print((b_len+3) * (a_len+3))
+
