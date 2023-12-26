@@ -1,108 +1,149 @@
 from copy import deepcopy
 
-with open("input", "r") as fp:
+with open("input2", "r") as fp:
     lines = [line.strip() for line in fp]
 
-grid = [[z for z in line] for line in lines]
-xrange = range(len(grid[0]))
-yrange = range(len(grid))
+grid1 = [[z for z in line] for line in lines]
+grid2 = deepcopy(grid1)
+xrange = range(len(grid1[0]))
+yrange = range(len(grid1))
 
-for i, x in enumerate(grid[0]):
-    if x == '.':
-        start = (0, i)
-for i, x in enumerate(grid[-1]):
-    if x == '.':
-        end = (len(grid) - 1, i)
+junctions1 = []
+junctions2 = []
+distances1 = {}
+distances2 = {}
 
-def print_grid(curr, g):
-    for j, y in enumerate(g):
-        for i, x in enumerate(y):
-            if (j, i) == curr:
-                print('*', end='')
-            else:
-                print(x, end='')
-        print()
-    print()
+for j, y in enumerate(grid1):
+    for i, x in enumerate(y):
+        if j == 0 and x == '.':
+            start = (j, i)
+            junctions1.append(start)
+            junctions2.append(start)
+        if j == len(grid1)-1 and x == '.':
+            end = (j, i)
+            junctions1.append(end)
+            junctions2.append(end)
+        if x == 'v' or x == '^' or x == '<' or x == '>':
+            grid2[j][i] = '.'
 
-DP = {}
-def skip_to_fork(g, c, d):
-    step = 1
-    y, x = c
+# part 1
+for j, y in enumerate(grid1):
+    for i, x in enumerate(y):
+        if grid1[j][i] == '.':
+            # find intersections
+            open_edged = 0
+            for z, coord in enumerate([[-1, 0], [0, 1], [1, 0], [0, -1]]):
+                jj = j + coord[0]
+                ii = i + coord[1]
+                if jj in yrange and ii in xrange and grid1[jj][ii] != '#':
+                    open_edged += 1
+            if open_edged > 2:
+                junctions1.append((j, i))
 
-    if c in DP:
-        coord, saved_step, last_dir = DP[c]
-        y, x = coord
-        if g[y][x] == '#' or g[y][x] == '*' or saved_step is None:
-            return (coord, None)
-        if last_dir == 2:
-            g[y-1][x] = '*'
-        if last_dir == 3:
-            g[y][x+1] = '*'
-        if last_dir == 0:
-            g[y+1][x] = '*'
-        if last_dir == 1:
-            g[y][x-1] = '*'
-        return (coord, saved_step)
-    
-    while True:
-        g[y][x] = '*'
-        directions = []
-        last_wall = 0
-        for i, coord in enumerate([[-1, 0], [0, 1], [1, 0], [0, -1]]):
-            yy = y + coord[0]
-            xx = x + coord[1]
-            if yy in yrange and xx in xrange and g[yy][xx] != '#' and g[yy][xx] != '*':
-                directions.append((yy, xx))
-                ld = i
-            if yy in yrange and xx in xrange and g[yy][xx] == '#':
-                last_wall += 1
-        if (y, x) == end:
-            return ((y, x), step)
-        elif len(directions) > 1:
-            DP[c] = ((y, x), step, last_dir)
-            print(len(DP))
-            return ((y, x), step)
-        elif len(directions) == 0:
-            if last_wall == 3:
-                DP[c] = ((y, x), None, last_dir)
-            return ((y, x), None)
-        else:
-            step += 1
-            y, x = directions[0]
-            last_dir = ld
+# part 2
+for j, y in enumerate(grid2):
+    for i, x in enumerate(y):
+        if grid2[j][i] == '.':
+            # find intersections
+            open_edged = 0
+            for z, coord in enumerate([[-1, 0], [0, 1], [1, 0], [0, -1]]):
+                jj = j + coord[0]
+                ii = i + coord[1]
+                if jj in yrange and ii in xrange and grid1[jj][ii] == '.':
+                    open_edged += 1
+            if open_edged > 2:
+                junctions2.append((j, i))
 
-def recursive(g, curr, part2, dir):
-    y, x = curr
-    g[y][x] = '*'
-
-    curr, s = skip_to_fork(g, curr, dir)
-
-    if s is None:
-        return -999999
-    y, x = curr
-    g[y][x] = '*'
-
-    # print_grid(curr, g)
-
-    if curr == end:
-        return s
-    
-    steps = [-999999]
-    for i, coord in enumerate([[-1, 0], [0, 1], [1, 0], [0, -1]]):
+# part 1
+oggrid = deepcopy(grid1)
+# find distances to each junction
+for junction in junctions1:
+    grid = deepcopy(oggrid)
+    y, x = junction
+    for z, coord in enumerate([[-1, 0], [0, 1], [1, 0], [0, -1]]):
         yy = y + coord[0]
         xx = x + coord[1]
-        if yy in yrange and xx in xrange and g[yy][xx] != '#' and g[yy][xx] != '*':
-            if part2:
-                steps.append(recursive(deepcopy(g), (yy, xx), part2, i))
-            else:
-                if not (coord[0] == -1 and g[yy][xx] == 'v') and  \
-                not (coord[0] == 1 and g[yy][xx] == '^') and \
-                not (coord[1] == -1 and g[yy][xx] == '>') and \
-                not (coord[1] == 1 and g[yy][xx] == '<'):
-                    steps.append(recursive(deepcopy(g), (yy, xx), part2, i))
+        if yy not in yrange or xx not in xrange:
+            continue
+        queue = [((yy, xx), 0)]
+        while queue:
+            c, s  = queue.pop(0)
+            j, i = c
+            s += 1
+            grid[j][i] = '#'
+            for zz, coord2 in enumerate([[-1, 0], [0, 1], [1, 0], [0, -1]]):
+                jj = j + coord2[0]
+                ii = i + coord2[1]
+                if jj not in yrange or ii not in xrange:
+                    continue
+                if (jj, ii) in junctions1 and (jj, ii) != (y, x):
+                    if (jj, ii) not in distances1:
+                        distances1[(jj, ii)] = [((y, x), s)]
+                    else:
+                        distances1[(jj, ii)].append(((y, x), s))
+                elif (zz == 0 and grid[jj][ii] in '.<>^') or (zz == 1 and grid[jj][ii] in '.^>v') or (zz == 2 and grid[jj][ii] in '.<>v') or (zz == 3 and grid[jj][ii] in '.<^v'):
+                    queue.append(((jj, ii), s))
 
-    return max(steps) + s
+# part 2
+oggrid = deepcopy(grid2)
+# find distances to each junction
+for junction in junctions2:
+    grid = deepcopy(oggrid)
+    y, x = junction
+    for z, coord in enumerate([[-1, 0], [0, 1], [1, 0], [0, -1]]):
+        yy = y + coord[0]
+        xx = x + coord[1]
+        if yy not in yrange or xx not in xrange:
+            continue
+        queue = [((yy, xx), 0)]
+        while queue:
+            c, s  = queue.pop(0)
+            j, i = c
+            s += 1
+            grid[j][i] = '#'
+            for zz, coord2 in enumerate([[-1, 0], [0, 1], [1, 0], [0, -1]]):
+                jj = j + coord2[0]
+                ii = i + coord2[1]
+                if jj not in yrange or ii not in xrange:
+                    continue
+                if (jj, ii) in junctions2 and (jj, ii) != (y, x):
+                    if (jj, ii) not in distances2:
+                        distances2[(jj, ii)] = [((y, x), s)]
+                    else:
+                        distances2[(jj, ii)].append(((y, x), s))
+                elif grid[jj][ii] == '.':
+                    queue.append(((jj, ii), s))
 
-print(recursive(deepcopy(grid), start, 0, 2) - 1)
-DP = {}
-print(recursive(deepcopy(grid), start, 1, 2) - 1)
+for k, v in distances1.items():
+    print(k, v)
+exit(0)
+
+# part 1        
+def recursive1(curr, visited):
+    visited.append(curr)
+    print(curr)
+    input()
+    if curr == end:
+        return 0
+    max_distance = [-999999]
+    for next_junction, steps in distances1[curr]:
+        if next_junction not in visited:
+            max_distance.append(recursive1(next_junction, deepcopy(visited)) + steps)
+
+    return max(max_distance)
+
+print(recursive1(start, []))
+
+# part 2        
+def recursive2(curr, visited):
+    visited.append(curr)
+    if curr == end:
+        return 0
+    max_distance = [-999999]
+    for next_junction, steps in distances2[curr]:
+        if next_junction not in visited:
+            max_distance.append(recursive2(next_junction, deepcopy(visited)) + steps)
+
+    return max(max_distance)
+
+print(recursive2(start, []))
