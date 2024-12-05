@@ -20,7 +20,6 @@ print(silver)
 
 flag = True
 for i, c in enumerate(puzzle_input):
-    # print(flag, i)
     if flag:
         if i < len(puzzle_input) - 7 and puzzle_input[i:i+7] == "don't()":
             flag = False
