@@ -1,0 +1,99 @@
+from heapq import heappop, heappush
+from copy import deepcopy
+
+with open("input", "r") as fp:
+    lines = [line.strip() for line in fp]
+
+grid = [[x for x in row] for row in lines]
+
+for j, y in enumerate(grid):
+    for i, x in enumerate(y):
+        if x == 'S':
+            start = (j, i)
+            grid[j][i] = '.'
+        if x == 'E':
+            ending = (j, i)
+            grid[j][i] = '.'
+
+directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+y_max = len(grid) - 1
+x_max = len(grid[0]) - 1
+
+queue = []
+# steps, y, x
+heappush(queue, (0, start[0], start[1]))
+best_steps = 999999999
+DP = {}
+while queue:
+    steps, y, x = heappop(queue)
+
+    if steps >= best_steps:
+        break
+
+    if (y, x) == ending:
+        if steps < best_steps:
+            best_steps = steps
+        continue
+
+    for dy, dx in directions:
+        ny = y + dy
+        nx = x + dx
+        if ny <= 0 or ny >= y_max or nx <= 0 or nx >= x_max:
+            continue
+        if grid[ny][nx] == '.':
+            if (ny, nx) not in DP or steps + 1 < DP[(ny, nx)]:
+                DP[(ny, nx)] = steps + 1
+                heappush(queue, (steps + 1, ny, nx))
+
+print(best_steps)
+exit(0)
+
+silver = 0
+queue = []
+max_val = 0
+DP = {}
+# steps, y, x, jump, path
+heappush(queue, (0, start[0], start[1], 0, []))
+while queue:
+    steps, y, x, jump, path = heappop(queue)
+    path.append((y, x))
+    # print(steps, y, x, jump)
+
+    #debug stuff
+    if steps > max_val:
+        print(steps, len(queue))
+        max_val = steps
+
+    if steps > best_steps:
+        break
+
+    if (y, x) == ending:
+        # if steps < best_steps:
+        if steps <= best_steps - 100:
+            silver += 1
+        continue
+
+    for dy, dx in directions:
+        ny = y + dy
+        nx = x + dx
+        if ny <= 0 or ny >= y_max or nx <= 0 or nx >= x_max:
+            continue
+        if grid[ny][nx] == '.' and (ny, nx) not in path:
+            if (ny, nx) not in DP:
+                # assert(False)
+                heappush(queue, (steps + 1, ny, nx, jump, deepcopy(path)))
+            elif (steps + 1) < DP[(ny, nx)]:
+                silver += 1
+
+        nny = ny + dy
+        nnx = nx + dx
+        if nny <= 0 or nny >= y_max or nnx <= 0 or nnx >= x_max:
+            continue
+        if grid[ny][nx] == '#' and grid[nny][nnx] == '.' and jump == 0 and (nny, nnx) not in path:
+            if (nny, nnx) not in DP:
+                # assert(False)
+                heappush(queue, (steps + 2, nny, nnx, 1, deepcopy(path)))
+            elif (steps + 2) < DP[(nny, nnx)]:
+                silver += 1
+
+print(silver)
