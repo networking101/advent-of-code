@@ -1,9 +1,11 @@
 
-with open("input2", "r") as fp:
+with open("input", "r") as fp:
     lines = [line.strip() for line in fp]
 
 grid = [[x for x in row] for row in lines]
 
+start = None
+ending = None
 for j, y in enumerate(grid):
     for i, x in enumerate(y):
         if x == 'S':
@@ -42,8 +44,8 @@ for k, v in positions.items():
         ny = y + 2*dy
         nx = x + 2*dx
         if (ny, nx) in positions:
-            # if positions[(y, x)] + 2 + (steps - positions[(ny, nx)]) <= steps - 100:
-            if positions[(y, x)] + 2 + (steps - positions[(ny, nx)]) < steps:
+            if positions[(y, x)] + 2 + (steps - positions[(ny, nx)]) <= steps - 100:
+            # if positions[(y, x)] + 2 + (steps - positions[(ny, nx)]) < steps:
                 silver += 1
 
 print(silver)
@@ -53,18 +55,19 @@ directions = [(-1, 1), (1, 1), (1, -1), (-1, -1)]
 gold = 0
 for k, v in positions.items():
     y, x = k
+    checked = []
     for dy, dx in directions:
         for i in range(21):
             for j in range(21):
                 if i + j > 20:
-                    break
+                    continue
                 ny = y + dy * i
                 nx = x + dx * j
                 if (ny, nx) in positions:
-                    # if positions[(y, x)] + 2 + (steps - positions[(ny, nx)]) <= steps - 100:
-                    if positions[(y, x)] + i + j + (steps - positions[(ny, nx)]) <= steps - 50:
-                        gold += 1
+                    if positions[(y, x)] + i + j + (steps - positions[(ny, nx)]) <= steps - 100:
+                    # if positions[(y, x)] + i + j + (steps - positions[(ny, nx)]) <= steps - 50:
+                        if ((y, x), (ny, nx)) not in checked:
+                            checked.append(((y, x), (ny, nx)))
+                            gold += 1
 
 print(gold)
-
-
