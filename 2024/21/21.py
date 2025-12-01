@@ -1,5 +1,11 @@
 from copy import deepcopy
 from heapq import heappop, heappush
+<<<<<<< HEAD
+=======
+from time import time
+
+start_time = time()
+>>>>>>> 6a8d8c88aff8db1d21b86e2dc975630f1a1bdc0f
 
 with open("input3", "r") as fp:
     lines = [line.strip() for line in fp]
@@ -50,9 +56,15 @@ for j, y in enumerate(num_pad):
                     continue
                 queue.append((step + 1, ny, nx, path_s + dir_to_directions[d]))
 
+<<<<<<< HEAD
 for k, v in num_dists.items():
     s, e = k
     print((num_pad[s[0]][s[1]], num_pad[e[0]][e[1]]), v)
+=======
+# for k, v in num_dists.items():
+#     s, e = k
+#     print((num_pad[s[0]][s[1]], num_pad[e[0]][e[1]]), v)
+>>>>>>> 6a8d8c88aff8db1d21b86e2dc975630f1a1bdc0f
 # exit(0)
 
 # get distances on direction pad
@@ -90,6 +102,7 @@ for j, y in enumerate(dir_pad):
 #     s, e = k
 #     print((dir_pad[s[0]][s[1]], dir_pad[e[0]][e[1]]), v)
 # exit(0)
+<<<<<<< HEAD
 
 def recurse_nums(codes, path):
     if len(codes) == 1:
@@ -97,13 +110,30 @@ def recurse_nums(codes, path):
     
     curr_pad = codes.pop(0)
     next_pad = codes[0]
+=======
+                
+# calculate direction lengths
+DP = {}
+for direct in ['^']
+exit(0)
+
+def recurse_nums(curr_pad, codes, path):
+    if len(codes) == 0:
+        return [path]
+    
+    next_pad = codes.pop(0)
+>>>>>>> 6a8d8c88aff8db1d21b86e2dc975630f1a1bdc0f
         
     min_paths = []
     len_min_path = 999999999
     for p in num_dists[(num_locations[curr_pad], num_locations[next_pad])]:
         new_path = deepcopy(path)
+<<<<<<< HEAD
         min_path = recurse_nums(deepcopy(codes), new_path + p + "A")
         tmp = 0
+=======
+        min_path = recurse_nums(next_pad, deepcopy(codes), new_path + p + "A")
+>>>>>>> 6a8d8c88aff8db1d21b86e2dc975630f1a1bdc0f
         for mp in min_path:
             if len(mp) < len_min_path:
                 min_paths = [mp]
@@ -114,19 +144,33 @@ def recurse_nums(codes, path):
     return min_paths
 
 DP = {}
+<<<<<<< HEAD
 def recurse_dirs(codes, path):
     if len(codes) == 1:
         return [path]
     
     curr_pad = codes.pop(0)
+=======
+def recurse_dirs(curr_pad, codes, path):
+    if len(codes) == 0:
+        return [path]
+
+    if (curr_pad, str(codes)) in DP:
+        return DP[(curr_pad, str(codes))]
+    
+>>>>>>> 6a8d8c88aff8db1d21b86e2dc975630f1a1bdc0f
     next_pad = codes[0]
         
     min_paths = []
     len_min_path = 999999999
     for p in dir_dists[(dir_locations[curr_pad], dir_locations[next_pad])]:
         new_path = deepcopy(path)
+<<<<<<< HEAD
         min_path = recurse_dirs(deepcopy(codes), new_path + p + "A")
         tmp = 0
+=======
+        min_path = recurse_dirs(next_pad, deepcopy(codes[1:]), new_path + p + "A")
+>>>>>>> 6a8d8c88aff8db1d21b86e2dc975630f1a1bdc0f
         for mp in min_path:
             if len(mp) < len_min_path:
                 min_paths = [mp]
@@ -134,6 +178,7 @@ def recurse_dirs(codes, path):
             elif len(mp) == len_min_path:
                 min_paths.append(mp)
 
+<<<<<<< HEAD
     DP[(curr_pad, next_pad, path)] = min_paths
     return min_paths
 
@@ -192,3 +237,36 @@ for mp in min_paths:
         min_paths.append(mp)
 
 print(min_paths)
+=======
+    DP[(curr_pad, str(codes))] = min_paths
+    return min_paths
+
+# numeric keypad
+mps = recurse_nums('A', codes, "")
+
+for x in mps:
+    print(x)
+print('\n')
+
+for i in range(3):
+    print(i)
+    print(len(mps))
+    print(time() - start_time)
+
+    len_min_path = 999999999
+    new_mps = []
+    for codes in mps:
+        # print(codes)
+        new_min_paths = recurse_dirs('A', list(codes), "")
+        if len(new_min_paths[0]) < len_min_path:
+            new_mps = new_min_paths
+            len_min_path = len(new_min_paths[0])
+        if len(new_min_paths[0]) == len_min_path:
+            new_mps += new_min_paths
+
+    for x in new_mps:
+        print(x)
+    print('\n')
+
+    mps = new_mps
+>>>>>>> 6a8d8c88aff8db1d21b86e2dc975630f1a1bdc0f
