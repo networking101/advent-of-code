@@ -14,10 +14,10 @@ for line in lines:
         else:
             position = (position - 1) % 100
         
-        if position == 0:
+        if not position:
             gold += 1
 
-    if position == 0:
+    if not position:
         silver += 1
 
 print(silver)
