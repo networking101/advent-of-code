@@ -22,7 +22,6 @@ for line in lines:
         saved_i = 0
         for i, x in enumerate(line[tmp_max_index:j - 12]):
             if int(max_val + x) > tmp_max:
-                print(int(max_val + x), tmp_max, i)
                 tmp_max = int(max_val + x)
                 saved_i = i
         tmp_max_index = tmp_max_index + saved_i + 1
