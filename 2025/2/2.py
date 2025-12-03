@@ -16,7 +16,7 @@ for line in lines:
         if curr[:mid] == curr[mid:]:
             silver += i
 
-        for j in range(len(curr)-1, 0, -1):
+        for j in range(1, len(curr)):
             pattern = "^(" + curr[:j] + ")+$"
             if re.match(pattern, curr):
                 gold += i
