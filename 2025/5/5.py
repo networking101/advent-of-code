@@ -1,9 +1,6 @@
 with open("input", "r") as fp:
     lines = [line.strip() for line in fp]
 
-y_dirs = [0, -1, -1, -1, 0, 1, 1, 1]
-x_dirs = [1, 1, 0, -1, -1, -1, 0, 1]
-
 fresh_ids = []
 ingredients = []
 switch = 0
