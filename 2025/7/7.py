@@ -1,11 +1,7 @@
 with open("input", "r") as fp:
     lines = [line.strip() for line in fp]
 
-y_dirs = [0, -1, -1, -1, 0, 1, 1, 1]
-x_dirs = [1, 1, 0, -1, -1, -1, 0, 1]
-
 grid = [list(line) for line in lines]
-
 y_pos = 0
 x_pos = 0
 
@@ -37,8 +33,6 @@ for j, y in enumerate(grid[0:]):
     if j == 0:
         gold_counts[x_pos] = 1
     for i, x in enumerate(y):
-        if x == '.':
-            continue
         if x == '^':
             if i - 1 >= 0:
                 gold_counts[i-1] += gold_counts[i]
