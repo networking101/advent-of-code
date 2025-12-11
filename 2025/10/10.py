@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-with open("input2", "r") as fp:
+with open("input", "r") as fp:
     lines = [line.strip() for line in fp]
 
 
@@ -57,9 +57,12 @@ def remove_buttons(x, bs):
             new_bs.remove(button)
     return new_bs
 
+def get_smallest_buttons(buttons, ):
+
+    return
+
 gold = 0
 for k, line in enumerate(lines):
-    print()
     print(k)
     a, b = line.split(']')
     b, c = b.split('{')
@@ -88,21 +91,14 @@ for k, line in enumerate(lines):
         new_bs = deepcopy(bs)
         for button in bs:
             new_counts = deepcopy(counts)
-            max_jump = 999999999
-            for j in (range(len(counts))):
-                assert(new_counts[j] <= c[j])
-                if (c[j] - new_counts[j]) < max_jump :
-                    max_jump = (c[j] - new_counts[j])
-
             for j in (range(len(counts))):
                 if j in button:
-                    new_counts[j] += max_jump
+                    new_counts[j] += 1
                     if new_counts[j] == c[j]:
                         new_bs = remove_buttons(j, bs)
 
             if new_counts == c:
-                print(f"MATCH: {i + max_jump}")
-                gold += i + max_jump
+                gold += i + 1
                 found = True
                 break
 
@@ -113,7 +109,7 @@ for k, line in enumerate(lines):
                     break
             if not break_counts and new_counts not in DP:
                 DP.append(new_counts)
-                queue.append([i + max_jump, prev_buttons + [button], new_counts, new_bs])
+                queue.append([i + 1, prev_buttons + [button], new_counts, new_bs])
 
         if found:
             break
