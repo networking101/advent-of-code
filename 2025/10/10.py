@@ -1,6 +1,9 @@
 from copy import deepcopy
+import time
+import itertools
+from collections import Counter
 
-with open("input", "r") as fp:
+with open("input2", "r") as fp:
     lines = [line.strip() for line in fp]
 
 
@@ -62,20 +65,26 @@ def find_new_buttons(done_buttons, curr_state):
     new_set_buttons = []
 
     min_val = 999999999
-    min_state = 0
+    min_states = []
     # print(curr_state, c)
     for i, (cs, es) in enumerate(zip(curr_state, c)):
-        if cs != es and es < min_val:
-            min_state = i
-            min_val = es
+        if cs != es and (es - cs) < min_val:
+            min_states = [i]
+            min_val = es - cs
+        elif cs != es and es == min_val:
+            min_states.append(i)
+            min_val = es - cs
 
-    # print(min_state, min_val)
+    # print(min_states, min_val)
 
-    for btn in b:
-        if btn not in done_buttons and min_state in btn:
-            new_set_buttons.append(btn)
+    for ms in min_states:
+        new_set = []
+        for btn in b:
+            if btn not in done_buttons and ms in btn:
+                new_set.append(btn)
 
-    return new_set_buttons
+        new_set_buttons.append(new_set)
+    return (new_set_buttons, min_val)
 
 fewest_buttons = 999999999
 def recursion(i, set_buttons, done_buttons, curr_state):
@@ -96,39 +105,40 @@ def recursion(i, set_buttons, done_buttons, curr_state):
         return i
 
     if len(set_buttons) == 0:
-        set_buttons = find_new_buttons(done_buttons, curr_state)
+        (new_set_buttons, jump) = find_new_buttons(done_buttons, curr_state)
+    else: 
+        assert(False)
 
-        # this path exausted all our button options without reaching the goal state
-        if len(set_buttons) == 0:
-            return 999999999
-
-    # print(set_buttons)
-    # exit(0)
-    need_to_remove_button = False
     result = 999999999
-    for sb in set_buttons:
-        if i == 0:
-            print(f"new top set: {sb}")
-        new_curr_state = deepcopy(curr_state)
+    for sbs in new_set_buttons:
 
-        for state in sb:
-            new_curr_state[state] += 1
+        if len(sbs) == 0:
+            continue
 
-            # if we reached an end condition for a state, need to remove the buttons for future calls
-            if new_curr_state[state] == c[state]:
-                need_to_remove_button = True
+        # try:
+        #     combinations = list(itertools.combinations_with_replacement(sbs, jump))
+        #     # print("jump, len(combinations)")
+        #     # print(jump, len(combinations))
+        # except:
+        #     print("jump, sbs")
+        #     print(jump, sbs)
+        #     assert("False")
 
-        tmp = 999999999
-        # if i == 58:
-        #     print("JUJU sb set_buttons need_to_remove_button")
-        #     print(f"JUJU {sb} {set_buttons} {need_to_remove_button}")
-        if need_to_remove_button:
-            tmp = recursion(i + 1, [], done_buttons + set_buttons, new_curr_state)
-        else:
-            tmp = recursion(i + 1, set_buttons, done_buttons, new_curr_state)
+        # for combo in combinations:
 
-        if tmp < result:
-            result = tmp
+        for sb in sbs:
+            new_curr_state = deepcopy(curr_state)
+            # print(sb)
+            for state in sb:
+                new_curr_state[state] += jump
+
+        # print("i + jump, [], done_buttons + sbs, new_curr_state")
+        # print(i + jump, [], done_buttons + sbs, new_curr_state)
+        # continue
+            tmp = recursion(i + jump, [], done_buttons + sbs, new_curr_state)
+            if tmp < result:
+                result = tmp
+
 
     # print(f"result: {result}, {i}")
     return result
@@ -156,8 +166,9 @@ for k, line in enumerate(lines):
     # reset globals
     fewest_buttons = 999999999
     print(b, c)
+    start_time = time.perf_counter()
     tmp = recursion(0, [], [], curr_state)
-    print(tmp)
+    print(tmp, time.perf_counter() - start_time)
     print()
     # exit(0)
 
@@ -166,3 +177,9 @@ for k, line in enumerate(lines):
 
 print("GOLD")
 print(gold)
+
+
+#Part 2:
+#I reorder the wirings. Roughly speaking, wirings that contain joltage ids that feature in the fewest wirings come first - I have the fewest choices for those joltage ids and I want to make those decisions early. If I have multiple wirings for such an id, I chose the wiring that includes the most other joltage ids first - I want to bring down the targets for those other ids early as well. This heuristic is important to speed up the calculations.
+#I go through the wirings one at a time, chose how often I apply the current wiring via a loop, update the remaining targets for all joltage ids, and then recursively call the same process for the next wiring, and so on. There are a number of checks along the way: a) if the number of current presses exceeds the best found solution, I exit from that branch of the recursion. b) the maximum number I can use the current wiring is the smallest remaining target for joltage ids included in that wiring. c) if the current wiring contains a joltage id for the last time, i.e. all future wirings that come afterwards won't contain that id anymore, then I know that the minimum I have to use this wiring is the remaining target for that joltage id. d) I only test values for using the current wiring between these minimum and maximum values.
+#For my inputs, this runs part 2 in about 30s

@@ -1,6 +1,9 @@
 from copy import deepcopy
+import time
+import itertools
+from collections import Counter
 
-with open("input", "r") as fp:
+with open("input3", "r") as fp:
     lines = [line.strip() for line in fp]
 
 
@@ -50,12 +53,96 @@ for k, line in enumerate(lines):
 
 print(silver)
 
-def remove_buttons(x, bs):
-    new_bs = deepcopy(bs)
-    for button in bs:
-        if j in button:
-            new_bs.remove(button)
-    return new_bs
+b = []
+c = []
+
+def find_new_buttons(done_buttons, curr_state):
+    global b
+    global c
+
+    # print(b, c)
+
+    new_set_buttons = []
+
+    min_val = 999999999
+    min_states = []
+    # print(curr_state, c)
+    for i, (cs, es) in enumerate(zip(curr_state, c)):
+        if cs != es and (es - cs) < min_val:
+            min_states = [i]
+            min_val = es - cs
+        elif cs != es and es == min_val:
+            min_states.append(i)
+            min_val = es - cs
+
+    # print(min_states, min_val)
+
+    for ms in min_states:
+        new_set = []
+        for btn in b:
+            if btn not in done_buttons and ms in btn:
+                new_set.append(btn)
+
+        new_set_buttons.append(new_set)
+    return (new_set_buttons, min_val)
+
+fewest_buttons = 999999999
+def recursion(i, set_buttons, done_buttons, curr_state):
+    global b
+    global c
+    global fewest_buttons
+
+    # print("i, set_buttons, done_buttons, curr_state")
+    # print(i, set_buttons, done_buttons, curr_state)
+    # input()
+
+    if i >= fewest_buttons:
+        return 999999999
+
+    if curr_state == c:
+        print(f"new fewest: {i}")
+        fewest_buttons = i
+        return i
+
+    if len(set_buttons) == 0:
+        (new_set_buttons, jump) = find_new_buttons(done_buttons, curr_state)
+    else: 
+        assert(False)
+
+    result = 999999999
+    for sbs in new_set_buttons:
+        # print(sbs)
+
+        if len(sbs) == 0:
+            continue
+
+        try:
+            combinations = list(itertools.combinations_with_replacement(sbs, jump))
+            # print("jump, len(combinations)")
+            # print(jump, len(combinations))
+        except:
+            print("jump, sbs")
+            print(jump, sbs)
+            assert("False")
+
+        for combo in combinations:
+
+            new_curr_state = deepcopy(curr_state)
+            for sb in combo:
+                # print(sb)
+                for state in sb:
+                    new_curr_state[state] += 1
+
+            # print("i + jump, [], done_buttons + sbs, new_curr_state")
+            # print(i + jump, [], done_buttons + sbs, new_curr_state)
+            # continue
+            tmp = recursion(i + jump, [], done_buttons + sbs, new_curr_state)
+            if tmp < result:
+                result = tmp
+
+
+    # print(f"result: {result}, {i}")
+    return result
 
 gold = 0
 for k, line in enumerate(lines):
@@ -68,47 +155,26 @@ for k, line in enumerate(lines):
     b = [[int(x) for x in y[1:-1].split(',')] for y in b]
     c = [int(x) for x in c[:-1].split(',')]
 
+    # if we sort the buttons in order of largest to smallest, we should increase performance
+    # not enough
+    # b = sorted(b, key=len, reverse=True)
 
     # print(a, b, c)
-    start_c = [0] * len(c)
+    # exit(0)
     
-    DP = []
-    queue = [[0, [], start_c, b]]
-    z = 0
-    while queue:
-        i, prev_buttons, counts, bs = queue.pop(0)
-        if i > z:
-            print(i)
-            z = i
+    curr_state = [0] * len(c)
+    
+    # reset globals
+    fewest_buttons = 999999999
+    print(b, c)
+    start_time = time.perf_counter()
+    tmp = recursion(0, [], [], curr_state)
+    print(tmp, time.perf_counter() - start_time)
+    print()
+    # exit(0)
 
+    gold += tmp
 
-        found = False
-
-        new_bs = deepcopy(bs)
-        for button in bs:
-            new_counts = deepcopy(counts)
-            for j in (range(len(counts))):
-                if j in button:
-                    new_counts[j] += 1
-                    if new_counts[j] == c[j]:
-                        new_bs = remove_buttons(j, bs)
-
-            if new_counts == c:
-                gold += i + 1
-                found = True
-                break
-
-            break_counts = False
-            for nc, cc in zip(new_counts, c):
-                if nc > cc:
-                    break_counts = True
-                    break
-            if not break_counts and new_counts not in DP:
-                DP.append(new_counts)
-                queue.append([i + 1, prev_buttons + [button], new_counts, new_bs])
-
-        if found:
-            break
 
 print("GOLD")
 print(gold)
